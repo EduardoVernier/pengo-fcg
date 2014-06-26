@@ -597,7 +597,6 @@ void setTextureToOpengl(Texture &tex)
     glTexImage2D(tex.type, 0, 4, tex.info->bmiHeader.biWidth, tex.info->bmiHeader.biHeight,
                   0, GL_RGBA, GL_UNSIGNED_BYTE, tex.rgba );
 
-
 }
 
 
