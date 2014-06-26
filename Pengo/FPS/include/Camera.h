@@ -4,7 +4,7 @@
 #include <gl/glu.h>
 
 #include <gl/glut.h>
-
+#include "../include/Point3D.h"
 class Camera
 {
     public:
@@ -16,11 +16,13 @@ class Camera
         void set_center(GLfloat cntrX, GLfloat cntrY, GLfloat cntrZ);
         void set_upvector(GLfloat upX, GLfloat upY, GLfloat upZ);
         void callGluLookAt();
-        void get_eye(GLfloat *eyeX, GLfloat *eyeY, GLfloat *eyeZ) const;
-        void get_center(GLfloat *cntrX, GLfloat *cntrY, GLfloat *cntrZ) const ;
-        void get_upvector(GLfloat *upX, GLfloat *upY, GLfloat *upZ) const;
+        Point3D get_eye() const;
+        Point3D get_center() const;
+        Point3D get_upvector() const;
     protected:
-        GLfloat eyeX, eyeY, eyeZ, cntrX, cntrY, cntrZ, upX, upY, upZ;
+        Point3D eye;
+        Point3D center;
+        Point3D up;
     private:
 };
 

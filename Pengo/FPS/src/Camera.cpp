@@ -12,62 +12,47 @@ Camera::~Camera()
 
 Camera::Camera(const Camera& other)
 {
-    other.get_eye(&this->eyeX, &this->eyeY, &this->eyeZ);
-    other.get_center(&this->cntrX, &this->cntrY, &this->cntrZ);
-    other.get_upvector(&this->upX, &this->upY, &this->upZ);
+    this->eye = other.get_eye();
+    this->center = other.get_center();
+    this->up = other.get_upvector();
 }
 
 Camera::Camera(GLfloat _eyeX, GLfloat _eyeY, GLfloat _eyeZ, GLfloat _cntrX, GLfloat _cntrY, GLfloat _cntrZ, GLfloat _upX, GLfloat _upY, GLfloat _upZ)
-    : eyeX(_eyeX), eyeY(_eyeY), eyeZ(_eyeZ), cntrX(_cntrX), cntrY(_cntrY), cntrZ(_cntrZ), upX(_upX), upY(_upY), upZ(_upZ)
+    : eye(_eyeX, _eyeY, _eyeZ), center(_cntrX, _cntrY, _cntrZ), up(_upX, _upY, _upZ)
 {
 
 }
 
-void Camera::get_center(GLfloat *cntrX, GLfloat *cntrY, GLfloat *cntrZ) const
+Point3D Camera::get_center() const
 {
-    if (!cntrX || !cntrY || !cntrZ) return;
-    *cntrX = this->cntrX;
-    *cntrY = this->cntrY;
-    *cntrZ = this->cntrZ;
+    return this->center;
 }
 
-void Camera::get_eye(GLfloat *eyeX, GLfloat *eyeY, GLfloat *eyeZ) const
+Point3D Camera::get_eye() const
 {
-    if (!eyeX || !eyeY || !eyeZ) return;
-    *eyeX = this->eyeX;
-    *eyeY = this->eyeY;
-    *eyeZ = this->eyeZ;
+    return this->eye;
 }
 
-void Camera::get_upvector(GLfloat *upX, GLfloat *upY, GLfloat *upZ) const
+Point3D Camera::get_upvector() const
 {
-    if (!upX || !upY || !upZ) return;
-    *upX = this->upX;
-    *upY = this->upY;
-    *upZ = this->upZ;
+    return this->up;
 }
 
 void Camera::set_eye(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ)
 {
-    this->eyeX = eyeX;
-    this->eyeY = eyeY;
-    this->eyeZ = eyeZ;
+    this->eye.set_coords(eyeX, eyeY, eyeZ);
 }
 void Camera::set_center(GLfloat cntrX, GLfloat cntrY, GLfloat cntrZ)
 {
-    this->cntrX = cntrX;
-    this->cntrY = cntrY;
-    this->cntrZ = cntrZ;
+    this->center.set_coords(cntrX, cntrY, cntrZ);
 }
 void Camera::set_upvector(GLfloat upX, GLfloat upY, GLfloat upZ)
 {
-    this->upX = upX;
-    this->upY = upY;
-    this->upZ = upZ;
+    this->up.set_coords(upX, upY, upZ);
 }
 void Camera::callGluLookAt()
 {
-    gluLookAt(this->eyeX, this->eyeY, this->eyeZ,
-              this->cntrX, this->cntrY, this->cntrZ,
-              this->upX, this->upY, this->upZ);
+    gluLookAt(this->eye.getX(), this->eye.getY(), this->eye.getZ(),
+              this->center.getX(), this->center.getY(), this->center.getZ(),
+              this->up.getX(), this->up.getY(), this->up.getZ());
 }

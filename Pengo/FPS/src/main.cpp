@@ -302,9 +302,9 @@ void updateCam() {
     GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     light1Angle = light1Angle > 360.0f ? (light1Angle - 360.0f) + 0.08f : light1Angle + 0.08f;
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
-    GLfloat dummy, eyeY;
-    ceilingCamera.get_eye(&dummy, &eyeY, &dummy);
-    ceilingCamera.set_eye(posX, eyeY, posZ);
+
+
+    ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
     ceilingCamera.set_center(posX, -1, posZ);
 }
 
