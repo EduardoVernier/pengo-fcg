@@ -25,11 +25,11 @@ seja uma spotlight;
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+//#include <math.h>
 #include <cmath>
 #include <iostream>
 #include <gl/glut.h>
-
+#include <string>
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -321,6 +321,31 @@ void renderLights()
     GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
+}
+
+void writeTextAt(int x, int y, std::string text)
+{
+    double matrix[16]; // Save the matrices
+    double mvmatrix[16];
+    glMatrixMode(GL_PROJECTION); // change the current matrix to PROJECTION
+    glGetDoublev(GL_PROJECTION_MATRIX, matrix); // get the values from PROJECTION matrix to local variable
+    glLoadIdentity(); // reset PROJECTION matrix to identity matrix
+    glOrtho(0, windowWidth, 0, windowHeight, 0.0, 5.0); // orthographic perspective
+    glMatrixMode(GL_MODELVIEW); // change current matrix to MODELVIEW matrix again
+    glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
+    glLoadIdentity(); // reset it to identity matrix
+    glPushMatrix(); // push current state of MODELVIEW matrix to stack
+    glLoadIdentity(); // reset it again. (may not be required, but it my convention)
+    glRasterPos2i(x, y); // raster position in 2D
+    glColor3d(1.0, 1.0, 1.0);
+    for(int i=0; i<text.size(); i++){
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
+    }
+    glPopMatrix(); // get MODELVIEW matrix value from stack
+    glMatrixMode(GL_PROJECTION); // change current matrix mode to PROJECTION
+    glLoadMatrixd(matrix); // reset
+    glMatrixMode(GL_MODELVIEW); // change current matrix mode to MODELVIEW
+    glLoadMatrixd(mvmatrix);
 }
 
 void initLight() {
@@ -692,20 +717,14 @@ void renderFloor() {
 	glPopMatrix();
 }
 
-void renderScene(bool isFPSCam) {
+void renderScene() {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
 	  // limpar o depth buffer
 
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
-	if (isFPSCam) updateCam();
-	else
-    {
-        ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
-        ceilingCamera.set_center(posX, -1, posZ);
-        ceilingCamera.callGluLookAt();
-    }
+
     renderLights();
     for (int i = 0; i < sceneHeight; ++i)
     {
@@ -753,8 +772,6 @@ void renderScene(bool isFPSCam) {
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
-
-
 
 	//modelAL.Translate(0.0f,1.0f,0.0f);
 	//modelAL.Draw();
@@ -839,6 +856,9 @@ void updateState() {
 Render scene
 */
 void mainRender() {
+
+
+
 	updateState();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0,0,windowWidth, windowHeight);
@@ -848,8 +868,11 @@ void mainRender() {
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderScene(true);
-
+	updateCam();
+	renderScene();
+    glDisable(GL_LIGHTING);
+    writeTextAt(50, 50, std::string("Hello"));
+    glEnable(GL_LIGHTING);
 
 	glViewport(windowWidth - 100, windowHeight -100, 100, 100);
 	glMatrixMode(GL_PROJECTION);
@@ -858,7 +881,10 @@ void mainRender() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderScene(false);
+	ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
+    ceilingCamera.set_center(posX, -1, posZ);
+    ceilingCamera.callGluLookAt();
+	renderScene();
 
     updateLights();
 

@@ -1,5 +1,5 @@
 #include "../include/Point3D.h"
-
+#include <cmath>
 Point3D::Point3D()
     : x(0.0), y(0.0), z(0.0)
 {
@@ -57,11 +57,26 @@ void Point3D::set_coords(GLfloat x, GLfloat y, GLfloat z)
     this->setX(x); this->setY(y); this->setZ(z);
 }
 
-Point3D Point3D::operator-(Point3D other)
+Point3D Point3D::operator-(const Point3D& other)
 {
     Point3D p(
               this->getX() - other.getX(),
               this->getY() - other.getY(),
               this->getZ() - other.getZ());
     return p;
+}
+
+Point3D Point3D::operator+(const Point3D& other)
+{
+    return Point3D(
+            this->getX() + other.getX(),
+            this->getY() + other.getY(),
+            this->getZ() + other.getZ());
+}
+
+double Point3D::distance_to(const Point3D& other)
+{
+    return std::sqrt(std::pow(other.getX() - this->getX(), 2) +
+    std::pow(other.getY() - this->getY(), 2) +
+    std::pow(other.getZ() - this->getZ(), 2));
 }
