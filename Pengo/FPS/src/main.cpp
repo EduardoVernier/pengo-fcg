@@ -107,12 +107,12 @@ GLfloat cubeNormals[6][3] =
 };*/
 GLfloat cubeNormals[6][3] =
 {
-    { -1.0f, 0.0f, 0.0f },
-    { 0.0f, -1.0f, 0.0f },
-    { 1.0f, 0.0f, 0.0f },
-    { 0.0f, -1.0f, 0.0f },
-    { 0.0f, 0.0f, 1.0f },
-    { 0.0f, 0.0f, -1.0f }
+    { -1.0f,  0.0f,  0.0f },
+    {  0.0f, -1.0f,  0.0f },
+    {  1.0f,  0.0f,  0.0f },
+    {  0.0f,  1.0f,  0.0f },
+    {  0.0f,  0.0f,  1.0f },
+    {  0.0f,  0.0f, -1.0f }
 };
 
 typedef struct textura {
@@ -237,12 +237,12 @@ int sceneWidth, sceneHeight;
 bool crouched = false;
 bool running = false;
 bool jumping = false;
-float jumpSpeed = 0.06;
+float jumpSpeed = 0.15;
 float gravity = 0.004;
 float heightLimit = 0.2;
 float posYOffset = 0.2;
 
-float backgroundColor[4] = {0.0f,0.0f,0.0f,1.0f};
+float backgroundColor[4] = {0.0, 0.0, 0.0, 1.0};
 
 float light1Angle = 0.0f;
 
@@ -289,8 +289,9 @@ void updateCam() {
 	source0Pos[1] = posY;
 	source0Pos[2] = posZ;
 
-    GLfloat light_position[] = {posX, posY, posZ, 1.0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+
+    //glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, {});
     /*
     GLfloat light_direction[] = {
         cntrX - eyeX,
@@ -299,13 +300,27 @@ void updateCam() {
     };
     glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
     */
-    GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
+
+
+
+}
+
+void updateLights()
+{
     light1Angle = light1Angle > 360.0f ? (light1Angle - 360.0f) + 0.08f : light1Angle + 0.08f;
+}
+
+void renderLights()
+{
+    GLfloat light_position[] = {posX, posY, posZ, 1.0 };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    Point3D direction1 = pengoCamera.get_center() - pengoCamera.get_eye();
+    GLfloat direction[] = {direction1.getX(), direction1.getY(), direction1.getZ(), 1.0 };
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, direction);
+    GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
-
-    ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
-    ceilingCamera.set_center(posX, -1, posZ);
 }
 
 void initLight() {
@@ -621,7 +636,6 @@ void drawCube(float side)
         glBegin(GL_QUADS);
         for (int k = 3; k >= 0; --k)
         {
-
             glTexCoord2i(k % 2, k / 2);
             glNormal3fv(cubeNormals[i]);
             glVertex3fv(cube[i][k]);
@@ -688,8 +702,11 @@ void renderScene(bool isFPSCam) {
 	if (isFPSCam) updateCam();
 	else
     {
+        ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
+        ceilingCamera.set_center(posX, -1, posZ);
         ceilingCamera.callGluLookAt();
     }
+    renderLights();
     for (int i = 0; i < sceneHeight; ++i)
     {
         for (int j = 0; j < sceneWidth; ++j)
@@ -843,7 +860,7 @@ void mainRender() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderScene(false);
 
-
+    updateLights();
 
 	glFlush();
 	glutPostRedisplay();

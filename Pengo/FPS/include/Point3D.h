@@ -17,6 +17,8 @@ class Point3D
         void setY(GLfloat y);
         void setZ(GLfloat z);
         void set_coords(GLfloat x, GLfloat y, GLfloat z);
+
+        Point3D operator- (Point3D other);
     protected:
         GLfloat x, y, z;
     private:

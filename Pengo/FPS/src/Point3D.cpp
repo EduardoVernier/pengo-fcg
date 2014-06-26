@@ -56,3 +56,12 @@ void Point3D::set_coords(GLfloat x, GLfloat y, GLfloat z)
 {
     this->setX(x); this->setY(y); this->setZ(z);
 }
+
+Point3D Point3D::operator-(Point3D other)
+{
+    Point3D p(
+              this->getX() - other.getX(),
+              this->getY() - other.getY(),
+              this->getZ() - other.getZ());
+    return p;
+}
