@@ -42,6 +42,8 @@ seja uma spotlight;
 //handle generic obj models
 #include "../include/3DObject.h"
 
+#include "../include/Camera.h"
+
 #pragma comment(lib, "OpenAL32.lib")
 #pragma comment(lib, "alut.lib")
 
@@ -247,7 +249,7 @@ float light1Angle = 0.0f;
 C3DObject ball, flower, pengo;
 Texture chao, iceCube;
 //CModelAl modelAL;
-
+Camera pengoCamera, ceilingCamera;
 void setWindow() {
 
 	glMatrixMode(GL_PROJECTION);
@@ -256,9 +258,10 @@ void setWindow() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
-		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
-		0.0,1.0,0.0);
+	pengoCamera.set_eye(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ);
+	pengoCamera.set_center(posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180));
+	pengoCamera.set_upvector(0.0, 1.0, 0.0);
+    pengoCamera.callGluLookAt();
 }
 GLfloat eyeX, eyeY, eyeZ, cntrX, cntrY, cntrZ;
 
@@ -272,9 +275,11 @@ void updateCam() {
     cntrX = posX + sin(roty*PI/180);
     cntrY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180);
     cntrZ = posZ - cos(roty*PI/180);
-	gluLookAt(eyeX, eyeY, eyeZ,
-		cntrX, cntrY, cntrZ,
-		0.0,1.0,0.0);
+
+    pengoCamera.set_eye(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)), posZ);
+    pengoCamera.set_center(posX + sin(roty*PI/180), posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180), posZ - cos(roty*PI/180));
+
+	pengoCamera.callGluLookAt();
 
 	// atualiza a posição do listener e da origen do som, são as mesmas da camera, já que os passos vem de onde o personagem está
 	listenerPos[0] = posX;
@@ -297,6 +302,10 @@ void updateCam() {
     GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     light1Angle = light1Angle > 360.0f ? (light1Angle - 360.0f) + 0.08f : light1Angle + 0.08f;
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+    GLfloat dummy, eyeY;
+    ceilingCamera.get_eye(&dummy, &eyeY, &dummy);
+    ceilingCamera.set_eye(posX, eyeY, posZ);
+    ceilingCamera.set_center(posX, -1, posZ);
 }
 
 void initLight() {
@@ -345,6 +354,9 @@ void mainInit() {
 	setWindow();
 	setViewport(0, windowWidth, 0, windowHeight);
 
+    ceilingCamera.set_eye(0.0, 5.0, 0.0);
+    ceilingCamera.set_center(0.0, -1.0, 0.0);
+    ceilingCamera.set_upvector(1.0, 0.0, 0.0);
 	// habilita remocao de faces ocultas
 
 	glFrontFace (GL_CCW);
@@ -667,14 +679,18 @@ void renderFloor() {
 	glPopMatrix();
 }
 
-void renderScene() {
+void renderScene(bool isFPSCam) {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
 	  // limpar o depth buffer
 
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
-	updateCam();
+	if (isFPSCam) updateCam();
+	else
+    {
+        ceilingCamera.callGluLookAt();
+    }
     for (int i = 0; i < sceneHeight; ++i)
     {
         for (int j = 0; j < sceneWidth; ++j)
@@ -816,17 +832,17 @@ void mainRender() {
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderScene();
+	renderScene(true);
 
 
 	glViewport(windowWidth - 100, windowHeight -100, 100, 100);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, 1, 0.5, 5.0);
+	gluPerspective(45.0, 1, 0.5, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderScene();
+	renderScene(false);
 
 
 

@@ -1037,3 +1037,35 @@
 1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
+1403808331 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<cmath>
+	<iostream>
+	<gl/glut.h>
+	"../include/al/alut.h"
+	"../include/bitmap.h"
+	"../include/3DObject.h"
+	"../include/Camera.h"
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\alut.h
+	<al/alc.h>
+	<al/al.h>
+	<OpenAL/alc.h>
+	<OpenAL/al.h>
+	"al.h"
+	"alc.h"
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\al.h
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\alc.h
+
+1403808435 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\camera.cpp
+	"../include/Camera.h"
+
+1403808432 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\camera.h
+	<gl/glu.h>
+	<gl/glut.h>
+
