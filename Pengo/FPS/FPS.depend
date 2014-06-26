@@ -986,3 +986,54 @@
 1403549348 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
+1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\3dobject.cpp
+	"../include/3DObject.h"
+	<malloc.h>
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\3dobject.h
+	<string.h>
+	"glm.h"
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\glm.h
+	<GLUT/glut.h>
+	<GL/gl.h>
+	<GL/glut.h>
+
+1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\bitmap.c
+	"../include/bitmap.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\bitmap.h
+	<GL/glut.h>
+	<windows.h>
+	<wingdi.h>
+
+1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\glm.cpp
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"../include/glm.h"
+
+1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\glmimg.cpp
+	<string.h>
+	<math.h>
+	"../include/Texture.h"
+	<windows.h>
+	<GL/gl.h>
+	"../include/glm.h"
+
+1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\texture.h
+	<windows.h>
+	<windowsx.h>
+	<stdlib.h>
+	<stdio.h>
+	<GL/glut.h>
+	<math.h>
+
+1403806563 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
+	"../include/Texture.h"
+

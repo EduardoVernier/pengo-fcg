@@ -60,7 +60,7 @@ typedef struct
     GLubyte r, g, b, a;
 } S_COLOR ;
 
-typedef enum { NOTHING, FLOWERS, DOLPHINS, BALL } OBJ_ENUM;
+typedef enum { NOTHING, ICECUBE, PENGO, BALL } OBJ_ENUM;
 
 OBJ_ENUM *sceneMatrix;
 
@@ -244,7 +244,7 @@ float backgroundColor[4] = {0.0f,0.0f,0.0f,1.0f};
 
 float light1Angle = 0.0f;
 
-C3DObject ball, flower, dolph;
+C3DObject ball, flower, pengo;
 Texture chao, iceCube;
 //CModelAl modelAL;
 
@@ -377,8 +377,8 @@ void initModel() {
 	printf("Loading models.. \n");
 	ball.Init();
 	ball.Load("ball.obj");
-	dolph.Init();
-	dolph.Load("penguin.obj");
+	pengo.Init();
+	pengo.Load("penguin.obj");
 	flower.Init();
 	flower.Load("flowers.obj");
 	//modelAL = CModelAl();
@@ -540,9 +540,9 @@ void initTexture(void)
             else if (cor == 0xFF0000)
                 sceneMatrix[aux] = BALL;
             else if (cor == 0x0000FF)
-                sceneMatrix[aux] = DOLPHINS;
+                sceneMatrix[aux] = PENGO;
             else if (cor == 0x00FF00)
-                sceneMatrix[aux] = FLOWERS;
+                sceneMatrix[aux] = ICECUBE;
             else sceneMatrix[aux] = NOTHING;
             aux++;
 	    }
@@ -626,8 +626,10 @@ void renderFloor() {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
     glBindTexture(GL_TEXTURE_2D, chao.texture);
 	glPushMatrix();
+
 
     glTranslatef(-(float)planeSize/2.0f, 0.0f, -(float)planeSize/2.0f);
 
@@ -659,7 +661,7 @@ void renderFloor() {
         }
     }
 
-	glDisable(type);
+	glDisable(GL_TEXTURE_2D);
 
 
 	glPopMatrix();
@@ -667,10 +669,10 @@ void renderFloor() {
 
 void renderScene() {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // limpar o depth buffer
+	  // limpar o depth buffer
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
 
 	updateCam();
     for (int i = 0; i < sceneHeight; ++i)
@@ -678,20 +680,19 @@ void renderScene() {
         for (int j = 0; j < sceneWidth; ++j)
         {
             glPushMatrix();
-            //glTranslatef(((double)8*i)/sceneHeight - 4.0, 1.0, ((double)8*j)/sceneWidth - 4.0);
             glTranslatef(planeSize/2.0f - (i * (planeSize/sceneWidth)), 1.0, planeSize/2.0f - (j * (planeSize/sceneHeight)));
-            float cubeSide = 1.0f;
+            float cubeSide = 0.8f;
             switch (sceneMatrix[i*sceneWidth + j])
             {
-            case FLOWERS:
+            case ICECUBE:
 
                 glPushMatrix();
-                glTranslatef(0.0, -cubeSide / 2.0, 0.0);
+                glTranslatef(0.0, -0.6, 0.0);
                 drawCube(cubeSide);
                 glPopMatrix();
                 break;
-            case DOLPHINS:
-                dolph.Draw(SMOOTH_MATERIAL_TEXTURE);
+            case PENGO:
+                pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
                 break;
             case BALL:
                 ball.Draw(SMOOTH_MATERIAL_TEXTURE);
@@ -703,16 +704,29 @@ void renderScene() {
             glPopMatrix();
         }
     }
-
+    /*
+    glDisable(GL_TEXTURE_2D);
+	glPointSize(10.0f);
+    glBegin(GL_POINTS);
+    glColor3f(1.0, 0.0, 0.0);
+    glVertex3f(-planeSize/2, 1.0f, -planeSize/2);
+    glColor3f(0.0, 1.0, 0.0);
+    glVertex3f(-planeSize/2, 1.0f, +planeSize/2);
+    glColor3f(0.0, 0.0, 1.0);
+    glVertex3f(planeSize/2, 1.0f, -planeSize/2);
+    glColor3f(1.0, 1.0, 0.0);
+    glVertex3f(planeSize/2, 1.0f, planeSize/2);
+    glEnd();
+    */
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
-    glBindTexture(GL_TEXTURE_2D, chao.type);
 	renderFloor();
+
+
 
 	//modelAL.Translate(0.0f,1.0f,0.0f);
 	//modelAL.Draw();
 }
-
 void updateState() {
 
 	if (upPressed || downPressed || rightPressed || leftPressed) {
@@ -794,7 +808,28 @@ Render scene
 */
 void mainRender() {
 	updateState();
+	glClear(GL_COLOR_BUFFER_BIT);
+	glViewport(0,0,windowWidth, windowHeight);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0, (GLfloat)windowWidth/(GLfloat)windowHeight, 0.1f, 100.0f);
+    glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClear(GL_DEPTH_BUFFER_BIT);
 	renderScene();
+
+
+	glViewport(windowWidth - 100, windowHeight -100, 100, 100);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0, 1, 0.5, 5.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	renderScene();
+
+
+
 	glFlush();
 	glutPostRedisplay();
 	Sleep(30);
