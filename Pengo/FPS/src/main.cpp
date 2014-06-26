@@ -638,7 +638,7 @@ void renderFloor() {
 	glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    glBindTexture(GL_TEXTURE_2D, chao.texture);
+    glBindTexture(GL_TEXTURE_2D, iceCube.texture);
 	glPushMatrix();
 
 
