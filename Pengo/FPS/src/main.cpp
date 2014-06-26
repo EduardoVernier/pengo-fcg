@@ -339,7 +339,7 @@ void writeTextAt(int x, int y, std::string text)
     glRasterPos2i(x, y); // raster position in 2D
     glColor3d(1.0, 1.0, 1.0);
     for(int i=0; i<text.size(); i++){
-        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
     }
     glPopMatrix(); // get MODELVIEW matrix value from stack
     glMatrixMode(GL_PROJECTION); // change current matrix mode to PROJECTION
@@ -755,20 +755,15 @@ void renderScene() {
             glPopMatrix();
         }
     }
-    /*
-    glDisable(GL_TEXTURE_2D);
-	glPointSize(10.0f);
-    glBegin(GL_POINTS);
-    glColor3f(1.0, 0.0, 0.0);
-    glVertex3f(-planeSize/2, 1.0f, -planeSize/2);
-    glColor3f(0.0, 1.0, 0.0);
-    glVertex3f(-planeSize/2, 1.0f, +planeSize/2);
-    glColor3f(0.0, 0.0, 1.0);
-    glVertex3f(planeSize/2, 1.0f, -planeSize/2);
-    glColor3f(1.0, 1.0, 0.0);
-    glVertex3f(planeSize/2, 1.0f, planeSize/2);
-    glEnd();
-    */
+    glPushMatrix();
+    {
+        Point3D pengoEye = pengoCamera.get_eye();
+        glTranslatef(pengoEye.getX(), 1.0f, pengoEye.getZ());
+        glRotatef(180 - roty, 0.0, 0.1, 0.0);
+        pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+    }
+    glPopMatrix();
+
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
