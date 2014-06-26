@@ -27,6 +27,8 @@ seja uma spotlight;
 #include <stdlib.h>
 //#include <math.h>
 #include <cmath>
+#include <ctime>
+#include <cstring>
 #include <iostream>
 #include <gl/glut.h>
 #include <string>
@@ -65,8 +67,6 @@ typedef struct
 typedef enum { NOTHING, ICECUBE, PENGO, BALL } OBJ_ENUM;
 
 OBJ_ENUM *sceneMatrix;
-
-
 
 GLfloat cube[6][4][3] =
 {
@@ -148,6 +148,8 @@ void updateState();
 void renderFloor();
 void updateCam();
 void setTextureToOpengl(Texture&);
+
+time_t startTime;
 
 /**
 Screen dimensions
@@ -758,7 +760,7 @@ void renderScene() {
     glPushMatrix();
     {
         Point3D pengoEye = pengoCamera.get_eye();
-        glTranslatef(pengoEye.getX(), 1.0f, pengoEye.getZ());
+        glTranslatef(pengoEye.getX(), 1.0f + posY, pengoEye.getZ());
         glRotatef(180 - roty, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }
@@ -847,6 +849,11 @@ void updateState() {
 
 }
 
+void getTimeString(int minutes, int seconds, char *out)
+{
+    sprintf(out, "%02d:%02d", minutes, seconds);
+}
+
 /**
 Render scene
 */
@@ -865,8 +872,14 @@ void mainRender() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	updateCam();
 	renderScene();
+	time_t now;
+	time(&now);
+	int diff = int(difftime(now, startTime));
     glDisable(GL_LIGHTING);
-    writeTextAt(50, 50, std::string("Hello"));
+    char buffer[7];
+    getTimeString(diff/60, diff % 60, buffer);
+    std::string printMe = buffer;
+    writeTextAt(0,0,printMe);
     glEnable(GL_LIGHTING);
 
 	glViewport(windowWidth - 100, windowHeight -100, 100, 100);
@@ -1082,7 +1095,12 @@ int main(int argc, char **argv) {
 	glutKeyboardUpFunc(onKeyUp);
 
 	mainInit();
-
+    time(&startTime);
+    #ifdef FULLSCREEN
+    glutFullScreen();
+    windowWidth = 1920;
+    windowHeight = 1080;
+    #endif
 	glutMainLoop();
 
     free(sceneMatrix);

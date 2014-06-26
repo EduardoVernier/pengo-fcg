@@ -1038,11 +1038,13 @@
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1403820228 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+1403824489 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
 	<cmath>
+	<ctime>
+	<cstring>
 	<iostream>
 	<gl/glut.h>
 	<string>
