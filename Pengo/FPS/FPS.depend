@@ -959,7 +959,7 @@
 	<GL/glut.h>
 	<math.h>
 
-1403804675 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\main.cpp
+1403811400 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
@@ -970,6 +970,7 @@
 	"../include/al/alut.h"
 	"../include/bitmap.h"
 	"../include/3DObject.h"
+	"../include/Camera.h"
 
 1403549324 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\alut.h
 	<al/alc.h>
@@ -1085,5 +1086,19 @@
 	<gl/gl.h>
 
 1403810310 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\point3d.cpp
+	"../include/Point3D.h"
+
+1403811172 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\camera.h
+	<gl/glu.h>
+	<gl/glut.h>
+	"../include/Point3D.h"
+
+1403811172 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\point3d.h
+	<gl/gl.h>
+
+1403811172 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\camera.cpp
+	"../include/Camera.h"
+
+1403811172 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\point3d.cpp
 	"../include/Point3D.h"
 
