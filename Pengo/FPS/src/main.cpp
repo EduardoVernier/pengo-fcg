@@ -726,8 +726,8 @@ void renderScene() {
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
-
     renderLights();
+
     for (int i = 0; i < sceneHeight; ++i)
     {
         for (int j = 0; j < sceneWidth; ++j)
@@ -923,23 +923,42 @@ void mainCreateMenu() {
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
+bool changingZoom = false;
+
 /**
 Mouse button event handler
 */
 void onMouseButton(int button, int state, int x, int y) {
 	//printf("onMouseButton button: %d \n", button);
+	if (button == GLUT_MIDDLE_BUTTON)
+    {
+        if (state == GLUT_DOWN)
+        {
+            changingZoom = true;
+        }
+        else changingZoom = false;
+    }
 	glutPostRedisplay();
+	mouseLastX = x;
+	mouseLastY = y;
 }
+
+
 
 /**
 Mouse move while button pressed event handler
 */
 void onMouseMove(int x, int y) {
 
-	/*mouseLastX = x;
-	mouseLastY = y;*/
 
+    if (changingZoom)
+    {
+        Point3D lastEye = ceilingCamera.get_eye();
+        ceilingCamera.set_eye(lastEye.getX(), lastEye.getY() + ((float)x-mouseLastX)/5, lastEye.getZ());
+    }
 	glutPostRedisplay();
+    mouseLastX = x;
+	mouseLastY = y;
 }
 
 /**
