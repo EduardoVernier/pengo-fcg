@@ -654,9 +654,11 @@ void setTextureToOpengl(Texture &tex)
 
 void enableFog(void)
 {
-    // glEnable(GL_FOG);
-    glFogf(GL_FOG_DENSITY, 0.25f);
-    glFogi(GL_FOG_MODE, GL_EXP);
+    glEnable(GL_FOG);
+    GLfloat color[] = {0.647, 0.94902, 0.9529, 1.0 };
+    glFogfv(GL_FOG_COLOR, color);
+    glFogf(GL_FOG_DENSITY, 0.05f);
+    glFogi(GL_FOG_MODE, GL_EXP2);
 }
 
 void drawCube(float side)
@@ -885,10 +887,13 @@ void mainRender() {
     writeTextAt(0,0,printMe);
     glEnable(GL_LIGHTING);
 
-	glViewport(windowWidth - 100, windowHeight -100, 100, 100);
+
+    setViewport((4*windowWidth)/5, windowWidth, (4*windowHeight)/5, windowHeight);
+
+	//glViewport(windowWidth - 100, windowHeight -100, 100, 100);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, 1, 0.5, 100);
+	gluPerspective(45.0, (GLfloat)windowWidth/(GLfloat)windowHeight, 0.5, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -959,7 +964,10 @@ void onMouseMove(int x, int y) {
     if (changingZoom)
     {
         Point3D lastEye = ceilingCamera.get_eye();
-        ceilingCamera.set_eye(lastEye.getX(), lastEye.getY() + (((float)y-mouseLastY) / 5.0), lastEye.getZ());
+        const float dy = float(y - mouseLastY) / 5.0;
+        float newY;
+        newY = lastEye.getY() + dy <= 3.0 ? 3.0 : lastEye.getY() + dy;
+        ceilingCamera.set_eye(lastEye.getX(), newY, lastEye.getZ());
     }
     mouseLastX = x;
 	mouseLastY = y;
