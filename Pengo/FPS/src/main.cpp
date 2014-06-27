@@ -404,7 +404,7 @@ void mainInit() {
 	setWindow();
 	setViewport(0, windowWidth, 0, windowHeight);
 
-    ceilingCamera.set_eye(0.0, 5.0, 0.0);
+    ceilingCamera.set_eye(0.0, 7.0, 0.0);
     ceilingCamera.set_center(0.0, -1.0, 0.0);
     ceilingCamera.set_upvector(1.0, 0.0, 0.0);
 	// habilita remocao de faces ocultas
@@ -864,7 +864,6 @@ Render scene
 void mainRender() {
 
 
-
 	updateState();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0,0,windowWidth, windowHeight);
@@ -887,24 +886,28 @@ void mainRender() {
     writeTextAt(0,0,printMe);
     glEnable(GL_LIGHTING);
 
-
+    glDisable(GL_FOG);
     setViewport((4*windowWidth)/5, windowWidth, (4*windowHeight)/5, windowHeight);
 
 	//glViewport(windowWidth - 100, windowHeight -100, 100, 100);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, (GLfloat)windowWidth/(GLfloat)windowHeight, 0.5, 100);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
 	glClear(GL_DEPTH_BUFFER_BIT);
+
 	ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
     ceilingCamera.set_center(posX, -1, posZ);
     ceilingCamera.callGluLookAt();
-	renderScene();
 
+    renderScene();
     updateLights();
 
 	glFlush();
+    glEnable(GL_FOG);
 	glutPostRedisplay();
 	Sleep(30);
 }
