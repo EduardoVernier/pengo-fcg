@@ -929,7 +929,7 @@ bool changingZoom = false;
 Mouse button event handler
 */
 void onMouseButton(int button, int state, int x, int y) {
-	//printf("onMouseButton button: %d \n", button);
+	printf("onMouseButton button: %d \n", button);
 	if (button == GLUT_MIDDLE_BUTTON)
     {
         if (state == GLUT_DOWN)
@@ -938,9 +938,12 @@ void onMouseButton(int button, int state, int x, int y) {
         }
         else changingZoom = false;
     }
+
+    mouseLastX = x;
+    mouseLastY = y;
+
 	glutPostRedisplay();
-	mouseLastX = x;
-	mouseLastY = y;
+
 }
 
 
@@ -950,15 +953,15 @@ Mouse move while button pressed event handler
 */
 void onMouseMove(int x, int y) {
 
-
     if (changingZoom)
     {
         Point3D lastEye = ceilingCamera.get_eye();
-        ceilingCamera.set_eye(lastEye.getX(), lastEye.getY() + ((float)x-mouseLastX)/5, lastEye.getZ());
+        ceilingCamera.set_eye(lastEye.getX(), lastEye.getY() + (((float)y-mouseLastY) / 5.0), lastEye.getZ());
     }
-	glutPostRedisplay();
     mouseLastX = x;
 	mouseLastY = y;
+	glutPostRedisplay();
+
 }
 
 /**
@@ -981,7 +984,7 @@ void onMousePassiveMove(int x, int y) {
 	mouseLastX = x;
 	mouseLastY = y;
 
-	//glutPostRedisplay();
+	glutPostRedisplay();
 }
 
 /**
