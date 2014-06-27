@@ -1038,7 +1038,7 @@
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1403840450 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+1403842567 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
@@ -1052,8 +1052,6 @@
 	"../include/bitmap.h"
 	"../include/3DObject.h"
 	"../include/Camera.h"
-	<vector>
-	<algorithm>
 
 1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\alut.h
 	<al/alc.h>

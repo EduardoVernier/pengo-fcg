@@ -321,6 +321,7 @@ void updateLights()
 
 void renderLights()
 {
+
     GLfloat light_position[] = {posX, posY, posZ, 1.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, pengoCamera.get_eye().as_opengl_vector());
 
@@ -740,7 +741,7 @@ void renderScene() {
         for (int j = 0; j < sceneWidth; ++j)
         {
             glPushMatrix();
-            glTranslatef(planeSize/2.0f - (i * (planeSize/sceneWidth)), 1.0, planeSize/2.0f - (j * (planeSize/sceneHeight)));
+            glTranslatef(0.5f + (i * (planeSize/sceneWidth)) - planeSize/2.0f, 1.0, 0.5f + (j * (planeSize/sceneHeight)) - planeSize/2.0f );
             float cubeSide =2.f;
             switch (sceneMatrix[i*sceneWidth + j])
             {
