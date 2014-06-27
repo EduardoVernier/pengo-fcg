@@ -55,6 +55,8 @@
 			<Add library="..\lib\alut.lib" />
 		</Linker>
 		<Unit filename="include/3DObject.h" />
+		<Unit filename="include/Camera.h" />
+		<Unit filename="include/Point3D.h" />
 		<Unit filename="include/Texture.h" />
 		<Unit filename="include/al/EFX-Util.h" />
 		<Unit filename="include/al/al.h" />
@@ -72,6 +74,8 @@
 		<Unit filename="include/gl/glut.h" />
 		<Unit filename="include/glm.h" />
 		<Unit filename="src/3DObject.cpp" />
+		<Unit filename="src/Camera.cpp" />
+		<Unit filename="src/Point3D.cpp" />
 		<Unit filename="src/Texture.cpp" />
 		<Unit filename="src/bitmap.c">
 			<Option compilerVar="CC" />
