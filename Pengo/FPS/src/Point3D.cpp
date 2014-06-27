@@ -94,7 +94,7 @@ Point3D Point3D::operator*(double scalar) const
     );
 }
 
-double Point3D::distance_to(const Point3D& other)
+double Point3D::distance_to(const Point3D& other) const
 {
     return std::sqrt(std::pow(other.getX() - this->getX(), 2) +
     std::pow(other.getY() - this->getY(), 2) +
@@ -106,3 +106,7 @@ Point3D::operator const GLfloat*() const
     return this->values;
 }
 
+const GLfloat* Point3D::as_opengl_vector() const
+{
+    return this->values;
+}

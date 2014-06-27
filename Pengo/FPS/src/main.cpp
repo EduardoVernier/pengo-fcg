@@ -154,8 +154,8 @@ time_t startTime;
 /**
 Screen dimensions
 */
-int windowWidth = 600;
-int windowHeight = 480;
+int windowWidth = 1024;
+int windowHeight = 768;
 
 /**
 Screen position
@@ -322,11 +322,11 @@ void updateLights()
 void renderLights()
 {
     GLfloat light_position[] = {posX, posY, posZ, 1.0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, (const GLfloat*)pengoCamera.get_eye());
+    glLightfv(GL_LIGHT0, GL_POSITION, pengoCamera.get_eye().as_opengl_vector());
 
     Point3D direction1 = pengoCamera.get_center() - pengoCamera.get_eye();
 
-    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, (const GLfloat*) direction1);
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, direction1.as_opengl_vector());
     GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
@@ -567,6 +567,7 @@ void initTexture(void)
         iceCube.rgbaptr[3] = 255;
     }
     setTextureToOpengl(iceCube);
+
     BITMAPINFO *sceneInfo = (BITMAPINFO*) malloc(sizeof(BITMAPINFO));
     GLubyte *sceneBmp = LoadDIBitmap("scene.bmp", &sceneInfo);
     if (sceneBmp == (GLubyte*) NULL) {
@@ -639,15 +640,16 @@ void setTextureToOpengl(Texture &tex)
 	glBindTexture(tex.type, tex.texture);
 
 	// Set texture parameters
-	glTexParameteri(tex.type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(tex.type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(tex.type, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+	glTexParameteri(tex.type, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
 	glTexParameteri(tex.type, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(tex.type, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexImage2D(tex.type, 0, 4, tex.info->bmiHeader.biWidth, tex.info->bmiHeader.biHeight,
                   0, GL_RGBA, GL_UNSIGNED_BYTE, tex.rgba );
 
+    gluBuild2DMipmaps(tex.type, 4, tex.info->bmiHeader.biWidth, tex.info->bmiHeader.biHeight,
+                      GL_RGBA, GL_UNSIGNED_BYTE, tex.rgba);
 }
-
 
 void enableFog(void)
 {
@@ -729,10 +731,8 @@ void renderFloor() {
 void renderScene() {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
 	  // limpar o depth buffer
-
 	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-
+    //glLoadIdentity();
     renderLights();
 
     for (int i = 0; i < sceneHeight; ++i)
@@ -745,11 +745,7 @@ void renderScene() {
             switch (sceneMatrix[i*sceneWidth + j])
             {
             case ICECUBE:
-
-                glPushMatrix();
-                glTranslatef(0.0, 0.0, 0.0);
                 drawCube(cubeSide);
-                glPopMatrix();
                 break;
             case PENGO:
                 pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
@@ -771,10 +767,7 @@ void renderScene() {
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }
     glPopMatrix();
-    glBegin(GL_POINTS);
-    glColor3d(1.0,1.0,1.0);
-    glVertex3f(0.0,0.0,1.0);
-    glEnd();
+
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
@@ -882,6 +875,7 @@ void mainRender() {
 	renderScene();
 	time_t now;
 	time(&now);
+
 	int diff = int(difftime(now, startTime));
     glDisable(GL_LIGHTING);
     char buffer[7];
@@ -1105,7 +1099,7 @@ int main(int argc, char **argv) {
 	/**
 	Store main window id so that glui can send it redisplay events
 	*/
-	mainWindowId = glutCreateWindow("FPS");
+	mainWindowId = glutCreateWindow("Pato Simulator 2014");
 
 	glutDisplayFunc(mainRender);
 

@@ -1038,7 +1038,7 @@
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1403836685 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+1403840450 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
@@ -1052,6 +1052,8 @@
 	"../include/bitmap.h"
 	"../include/3DObject.h"
 	"../include/Camera.h"
+	<vector>
+	<algorithm>
 
 1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\alut.h
 	<al/alc.h>
@@ -1084,11 +1086,11 @@
 	<stddef.h>
 	<GL/gl.h>
 
-1403836119 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\point3d.h
+1403837951 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\point3d.h
 	<gl/gl.h>
 	<cstdio>
 
-1403836444 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\point3d.cpp
+1403838039 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\point3d.cpp
 	"../include/Point3D.h"
 	<cmath>
 

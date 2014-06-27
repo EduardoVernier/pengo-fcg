@@ -25,7 +25,9 @@ class Point3D
         explicit operator const GLfloat*() const;
 
         friend Point3D operator* (const double& left, const Point3D& right);
-        double distance_to(const Point3D& other);
+        double distance_to(const Point3D& other) const;
+
+        const GLfloat* as_opengl_vector() const;
     protected:
         GLfloat x, y, z;
         GLfloat* values = NULL;
