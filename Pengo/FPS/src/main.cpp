@@ -252,6 +252,7 @@ C3DObject ball, flower, pengo;
 Texture chao, iceCube;
 //CModelAl modelAL;
 Camera pengoCamera, ceilingCamera;
+Point3D pengoPosition;
 void setWindow() {
 
 	glMatrixMode(GL_PROJECTION);
@@ -278,9 +279,14 @@ void updateCam() {
     cntrY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180);
     cntrZ = posZ - cos(roty*PI/180);
 
+    pengoPosition.set_coords(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) , posZ);
+    /*
     pengoCamera.set_eye(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)), posZ);
     pengoCamera.set_center(posX + sin(roty*PI/180), posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180), posZ - cos(roty*PI/180));
-
+    */
+    pengoCamera.set_eye(pengoPosition + Point3D(5 * sin(roty*PI/180), -5*cos(rotx*PI/180), 5*cos(roty*PI/180)));
+    pengoCamera.set_center(pengoPosition);
+    pengoCamera.set_upvector(0.0, 1.0, 0.0);
 	pengoCamera.callGluLookAt();
 
 	// atualiza a posição do listener e da origen do som, são as mesmas da camera, já que os passos vem de onde o personagem está
@@ -759,13 +765,15 @@ void renderScene() {
     }
     glPushMatrix();
     {
-        Point3D pengoEye = pengoCamera.get_eye();
-        glTranslatef(pengoEye.getX(), 1.0f + posY, pengoEye.getZ());
-        glRotatef(180 - roty, 0.0, 0.1, 0.0);
+        glTranslatef(pengoPosition.getX(), 1.0f + pengoPosition.getY(), pengoPosition.getZ());
+        glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }
     glPopMatrix();
-
+    glBegin(GL_POINTS);
+    glColor3d(1.0,1.0,1.0);
+    glVertex3f(0.0,0.0,1.0);
+    glEnd();
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
@@ -776,13 +784,12 @@ void renderScene() {
 void updateState() {
 
 	if (upPressed || downPressed || rightPressed || leftPressed) {
-
 		if (running) {
-			speedX = 0.05 * sin(roty*PI/180) * 2;
-			speedZ = -0.05 * cos(roty*PI/180) * 2;
+			speedX = 0.05 * sin((roty-180)*PI/180) * 2;
+			speedZ = -0.05 * cos((roty)*PI/180) * 2;
 		} else {
-			speedX = 0.05 * sin(roty*PI/180);
-			speedZ = -0.05 * cos(roty*PI/180);
+			speedX = 0.05 * sin((roty-180)*PI/180);
+			speedZ = -0.05 * cos((roty)*PI/180);
 		}
 
 		// efeito de "sobe e desce" ao andar
@@ -801,14 +808,14 @@ void updateState() {
         }
 
         if (rightPressed){
-            speedX = 0.05 * sin((roty)*PI/180+(3.14/2));
-			speedZ = -0.05 * cos((roty)*PI/180+(3.14/2));
+            speedX = -0.05 * sin((roty-180)*PI/180+(3.14/2));
+			speedZ = 0.05 * cos((roty)*PI/180+(3.14/2));
             posX += speedX;
             posZ += speedZ;
         }
         if (leftPressed){
-            speedX = 0.05 * sin((roty)*PI/180-(3.14/2));
-			speedZ = -0.05 * cos((roty)*PI/180-(3.14/2));
+            speedX = -0.05 * sin((roty-180)*PI/180-(3.14/2));
+			speedZ = 0.05 * cos((roty)*PI/180-(3.14/2));
             posX += speedX;
             posZ += speedZ;
         }

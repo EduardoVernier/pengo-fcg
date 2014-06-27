@@ -42,14 +42,32 @@ void Camera::set_eye(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ)
 {
     this->eye.set_coords(eyeX, eyeY, eyeZ);
 }
+
+void Camera::set_eye(Point3D eye)
+{
+    this->eye = eye;
+}
+
 void Camera::set_center(GLfloat cntrX, GLfloat cntrY, GLfloat cntrZ)
 {
     this->center.set_coords(cntrX, cntrY, cntrZ);
 }
+
+void Camera::set_center(Point3D center)
+{
+    this->center = center;
+}
+
 void Camera::set_upvector(GLfloat upX, GLfloat upY, GLfloat upZ)
 {
     this->up.set_coords(upX, upY, upZ);
 }
+
+void Camera::set_upvector(Point3D upvector)
+{
+    this->up = upvector;
+}
+
 void Camera::callGluLookAt()
 {
     gluLookAt(this->eye.getX(), this->eye.getY(), this->eye.getZ(),

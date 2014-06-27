@@ -13,8 +13,11 @@ class Camera
         Camera(const Camera& other);
         Camera(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat cntrX, GLfloat cntrY, GLfloat cntrZ, GLfloat upX, GLfloat upY, GLfloat upZ);
         void set_eye(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ);
+        void set_eye(Point3D eye);
         void set_center(GLfloat cntrX, GLfloat cntrY, GLfloat cntrZ);
+        void set_center(Point3D center);
         void set_upvector(GLfloat upX, GLfloat upY, GLfloat upZ);
+        void set_upvector(Point3D upvector);
         void callGluLookAt();
         Point3D get_eye() const;
         Point3D get_center() const;
