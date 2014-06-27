@@ -272,19 +272,20 @@ GLfloat eyeX, eyeY, eyeZ, cntrX, cntrY, cntrZ;
 Atualiza a posição e orientação da camera
 */
 void updateCam() {
+    /*
     eyeX = posX;
     eyeY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180));
     eyeZ = posZ;
     cntrX = posX + sin(roty*PI/180);
     cntrY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180);
     cntrZ = posZ - cos(roty*PI/180);
-
+    */
     pengoPosition.set_coords(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) , posZ);
     /*
     pengoCamera.set_eye(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)), posZ);
     pengoCamera.set_center(posX + sin(roty*PI/180), posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180), posZ - cos(roty*PI/180));
     */
-    pengoCamera.set_eye(pengoPosition + Point3D(5 * sin(roty*PI/180), -5*cos(rotx*PI/180), 5*cos(roty*PI/180)));
+    pengoCamera.set_eye(pengoPosition + 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
     pengoCamera.set_center(pengoPosition);
     pengoCamera.set_upvector(0.0, 1.0, 0.0);
 	pengoCamera.callGluLookAt();
@@ -984,8 +985,8 @@ void onMousePassiveMove(int x, int y) {
 		rotx = -128.0;
 	}
 
-	if (rotx > -45.0) {
-		rotx = -45.0;
+	if (rotx > -90.0) {
+		rotx = -90.0;
 	}
 
 	mouseLastX = x;

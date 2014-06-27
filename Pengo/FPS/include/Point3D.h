@@ -18,9 +18,10 @@ class Point3D
         void setZ(GLfloat z);
         void set_coords(GLfloat x, GLfloat y, GLfloat z);
 
-        Point3D operator- (const Point3D& other);
-        Point3D operator+ (const Point3D& other);
-
+        Point3D operator- (const Point3D& other) const;
+        Point3D operator+ (const Point3D& other) const;
+        Point3D operator* (double scalar) const;
+        friend Point3D operator* (const double& left, const Point3D& right);
         double distance_to(const Point3D& other);
     protected:
         GLfloat x, y, z;

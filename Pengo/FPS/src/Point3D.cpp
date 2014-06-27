@@ -57,7 +57,7 @@ void Point3D::set_coords(GLfloat x, GLfloat y, GLfloat z)
     this->setX(x); this->setY(y); this->setZ(z);
 }
 
-Point3D Point3D::operator-(const Point3D& other)
+Point3D Point3D::operator-(const Point3D& other) const
 {
     Point3D p(
               this->getX() - other.getX(),
@@ -66,12 +66,26 @@ Point3D Point3D::operator-(const Point3D& other)
     return p;
 }
 
-Point3D Point3D::operator+(const Point3D& other)
+Point3D Point3D::operator+(const Point3D& other) const
 {
     return Point3D(
             this->getX() + other.getX(),
             this->getY() + other.getY(),
             this->getZ() + other.getZ());
+}
+
+Point3D operator*(const double& left, const Point3D& right)
+{
+    return right * left;
+}
+
+Point3D Point3D::operator*(double scalar) const
+{
+    return Point3D(
+       scalar*this->getX(),
+       scalar*this->getY(),
+       scalar*this->getZ()
+    );
 }
 
 double Point3D::distance_to(const Point3D& other)
@@ -80,3 +94,5 @@ double Point3D::distance_to(const Point3D& other)
     std::pow(other.getY() - this->getY(), 2) +
     std::pow(other.getZ() - this->getZ(), 2));
 }
+
+
