@@ -972,7 +972,7 @@ Mouse move with no button pressed event handler
 */
 void onMousePassiveMove(int x, int y) {
 
-	roty += (x - mouseLastX);
+	roty -= (x - mouseLastX);
 
 	rotx -= (y - mouseLastY);
 
