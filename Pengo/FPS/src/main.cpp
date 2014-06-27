@@ -322,11 +322,11 @@ void updateLights()
 void renderLights()
 {
     GLfloat light_position[] = {posX, posY, posZ, 1.0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_POSITION, (const GLfloat*)pengoCamera.get_eye());
 
     Point3D direction1 = pengoCamera.get_center() - pengoCamera.get_eye();
-    GLfloat direction[] = {direction1.getX(), direction1.getY(), direction1.getZ(), 1.0 };
-    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, direction);
+
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, (const GLfloat*) direction1);
     GLfloat light_position1[] = { -9.0f*cos(light1Angle), 3.0f, 9.0f * sin(light1Angle) , 0.0f};
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
 
@@ -741,13 +741,13 @@ void renderScene() {
         {
             glPushMatrix();
             glTranslatef(planeSize/2.0f - (i * (planeSize/sceneWidth)), 1.0, planeSize/2.0f - (j * (planeSize/sceneHeight)));
-            float cubeSide = 0.8f;
+            float cubeSide =2.f;
             switch (sceneMatrix[i*sceneWidth + j])
             {
             case ICECUBE:
 
                 glPushMatrix();
-                glTranslatef(0.0, -0.6, 0.0);
+                glTranslatef(0.0, 0.0, 0.0);
                 drawCube(cubeSide);
                 glPopMatrix();
                 break;
@@ -766,7 +766,7 @@ void renderScene() {
     }
     glPushMatrix();
     {
-        glTranslatef(pengoPosition.getX(), 1.0f + pengoPosition.getY(), pengoPosition.getZ());
+        glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
         glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }

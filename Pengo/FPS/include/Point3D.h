@@ -2,7 +2,7 @@
 #define POINT3D_H
 
 #include <gl/gl.h>
-
+#include <cstdio>
 class Point3D
 {
     public:
@@ -21,10 +21,14 @@ class Point3D
         Point3D operator- (const Point3D& other) const;
         Point3D operator+ (const Point3D& other) const;
         Point3D operator* (double scalar) const;
+
+        explicit operator const GLfloat*() const;
+
         friend Point3D operator* (const double& left, const Point3D& right);
         double distance_to(const Point3D& other);
     protected:
         GLfloat x, y, z;
+        GLfloat* values = NULL;
     private:
 };
 

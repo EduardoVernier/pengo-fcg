@@ -3,21 +3,27 @@
 Point3D::Point3D()
     : x(0.0), y(0.0), z(0.0)
 {
-    //ctor
+    this->values = new GLfloat[4];
+    this->values[0] = this->values[1] = this->values[2] = 0.0;
+    this->values[3] = 1.0;
 }
 
 Point3D::~Point3D()
 {
-    //dtor
+    delete [] (this->values);
 }
 
 Point3D::Point3D(GLfloat x, GLfloat y, GLfloat z)
-    : x(x), y(y), z(z)
+    : Point3D()
 {
-
+    this->setX(x);
+    this->setY(y);
+    this->setZ(z);
 }
 
+
 Point3D::Point3D(const Point3D& other)
+    : Point3D()
 {
     this->setX(other.getX());
     this->setY(other.getY());
@@ -39,17 +45,17 @@ GLfloat Point3D::getZ() const
 
 void Point3D::setX(GLfloat x)
 {
-    this->x = x;
+    this->values[0] = this->x = x;
 }
 
 void Point3D::setY(GLfloat y)
 {
-    this->y = y;
+    this->values[1] = this->y = y;
 }
 
 void Point3D::setZ(GLfloat z)
 {
-    this->z = z;
+    this->values[2] = this->z = z;
 }
 
 void Point3D::set_coords(GLfloat x, GLfloat y, GLfloat z)
@@ -95,4 +101,8 @@ double Point3D::distance_to(const Point3D& other)
     std::pow(other.getZ() - this->getZ(), 2));
 }
 
+Point3D::operator const GLfloat*() const
+{
+    return this->values;
+}
 
