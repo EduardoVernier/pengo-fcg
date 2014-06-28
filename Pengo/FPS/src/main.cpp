@@ -279,13 +279,14 @@ void updateCam() {
 	source0Pos[1] = posY;
 	source0Pos[2] = posZ;
 
+    /*
 	int cMatrixX = planeSize/2 + (int) floor(posX);
 	int cMatrixZ = planeSize/2 + (int) floor(posZ);
 
     printf("x: %f z: %f - ", posX, posZ);
     printf("Mx: %d Mz: %d - ", cMatrixX, cMatrixZ);
     printf("Col: %d\n ", collisionMatrix[cMatrixX][cMatrixZ]);
-
+*/
     //glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, {});
     /*
     GLfloat light_direction[] = {
@@ -730,15 +731,16 @@ void renderScene() {
         for (int j = 0; j < sceneWidth; ++j)
         {
             GLfloat x = i - (sceneHeight/2) + 0.5f;
-            GLfloat y = 1.0f;
+            GLfloat y = 0.5f;
             GLfloat z = j - (sceneWidth/2) + 0.5f;
+
 
             GLint xAtMatrix = planeSize/2 + (int) floor(x) ;
             GLint zAtMatrix = planeSize/2 + (int) floor(z) ;
 
             glPushMatrix();
             glTranslatef(x, y ,z);
-            float cubeSide =1.8f; // numero magico
+            float cubeSide =1; // numero magico é 1.8
             switch (sceneMatrix[i*sceneWidth + j])
             {
             case ICECUBE:
@@ -781,31 +783,49 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
     //   . . .   8 neighborhood fill
     //   . x .
     //   . . .
-    collisionMatrix[xAtMatrix][zAtMatrix] = obj;
+
+    if (obj == ICECUBE){ // vizinhança 4
+        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
+
     if (xAtMatrix-1 > 0)
         collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
     if (xAtMatrix+1 < planeSize)
         collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
-
-    if (zAtMatrix-1 > 0){
+    if (zAtMatrix-1 > 0)
         collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
-
-        if (xAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix-1][zAtMatrix-1] = obj;
-
-        if (xAtMatrix+1 < planeSize)
-            collisionMatrix[xAtMatrix+1][zAtMatrix-1] = obj;
-    }
-
-    if (zAtMatrix + 1 < planeSize){
+    if (zAtMatrix + 1 < planeSize)
         collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+    }
+    else {
+        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
 
         if (xAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix-1][zAtMatrix+1] = obj;
-
+            collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
         if (xAtMatrix+1 < planeSize)
-            collisionMatrix[xAtMatrix+1][zAtMatrix+1] = obj;
+            collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
+
+        if (zAtMatrix-1 > 0){
+            collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
+
+            if (xAtMatrix-1 > 0)
+                collisionMatrix[xAtMatrix-1][zAtMatrix-1] = obj;
+
+            if (xAtMatrix+1 < planeSize)
+                collisionMatrix[xAtMatrix+1][zAtMatrix-1] = obj;
+        }
+
+        if (zAtMatrix + 1 < planeSize){
+            collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+
+            if (xAtMatrix-1 > 0)
+                collisionMatrix[xAtMatrix-1][zAtMatrix+1] = obj;
+
+            if (xAtMatrix+1 < planeSize)
+                collisionMatrix[xAtMatrix+1][zAtMatrix+1] = obj;
+        }
+
     }
+
 }
 
 
@@ -831,6 +851,16 @@ void updateState() {
                 posX += speedX;
                 posZ += speedZ;
             }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
 
         }
         if (downPressed) {
@@ -838,6 +868,16 @@ void updateState() {
             if (futurePengoCollision(posX - speedX, posZ - speedZ)==false){
                 posX -= speedX;
                 posZ -= speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
             }
         }
 
@@ -849,6 +889,16 @@ void updateState() {
                 posX += speedX;
                 posZ += speedZ;
             }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
         }
         if (leftPressed){
             speedX = -0.05 * sin((roty-180)*PI/180-(3.14/2));
@@ -856,6 +906,16 @@ void updateState() {
             if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
                 posZ += speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
             }
 
         }
@@ -902,7 +962,25 @@ bool futurePengoCollision (float pengoX, float pengoZ){
     int z = mapToMatrixCoordinates(pengoZ);
 
     return collisionMatrix[x][z] != NOTHING;
+    //gambiarra pra lidar com o erro do tamanho do bloco
+    /*
+    if (collisionMatrix[x][z] != NOTHING){
+        float mX = x-12; //24 é o tamanho da matriz, refatorarei no futuro
+        float mZ = z-12;
 
+        float distFromCenterOfPoligon = ::sqrt(
+                  std::pow(mX - pengoX, 2) +
+                  std::pow(mZ - pengoZ, 2));
+
+        printf ("%f \n", distFromCenterOfPoligon);
+        if (distFromCenterOfPoligon > 1) // touching threshold
+            return false;
+        else
+            return true;
+    }
+    else
+        return false;
+*/
 }
 
 int mapToMatrixCoordinates (float i){
