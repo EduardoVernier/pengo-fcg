@@ -911,31 +911,31 @@
 1403549348 source:c:\users\samsung\desktop\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1403549257 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\3dobject.cpp
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\3dobject.cpp
 	"../include/3DObject.h"
 	<malloc.h>
 
-1399349091 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\3dobject.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\3dobject.h
 	<string.h>
 	"glm.h"
 
-1398812018 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\glm.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\glm.h
 	<GLUT/glut.h>
 	<GL/gl.h>
 	<GL/glut.h>
 
-1403549265 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\bitmap.c
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\bitmap.c
 	"../include/bitmap.h"
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
 
-1032715440 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\bitmap.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\bitmap.h
 	<GL/glut.h>
 	<windows.h>
 	<wingdi.h>
 
-1403549271 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\glm.cpp
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -943,7 +943,7 @@
 	<assert.h>
 	"../include/glm.h"
 
-1403549281 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\glmimg.cpp
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\glmimg.cpp
 	<string.h>
 	<math.h>
 	"../include/Texture.h"
@@ -951,7 +951,7 @@
 	<GL/gl.h>
 	"../include/glm.h"
 
-1398812010 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\texture.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\texture.h
 	<windows.h>
 	<windowsx.h>
 	<stdlib.h>
@@ -959,20 +959,22 @@
 	<GL/glut.h>
 	<math.h>
 
-1403811400 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\main.cpp
+1403987577 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
-	<math.h>
 	<cmath>
+	<ctime>
+	<cstring>
 	<iostream>
 	<gl/glut.h>
+	<string>
 	"../include/al/alut.h"
 	"../include/bitmap.h"
 	"../include/3DObject.h"
 	"../include/Camera.h"
 
-1403549324 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\alut.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\alut.h
 	<al/alc.h>
 	<al/al.h>
 	<OpenAL/alc.h>
@@ -980,11 +982,11 @@
 	"al.h"
 	"alc.h"
 
-1165613458 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\al.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\al.h
 
-1176501768 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\alc.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\al\alc.h
 
-1403549348 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\texture.cpp
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\3dobject.cpp
@@ -1092,17 +1094,19 @@
 	"../include/Point3D.h"
 	<cmath>
 
-1403811172 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\camera.h
+1403970492 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\camera.h
 	<gl/glu.h>
 	<gl/glut.h>
 	"../include/Point3D.h"
 
-1403811172 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\point3d.h
+1403986018 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\point3d.h
 	<gl/gl.h>
+	<cstdio>
 
-1403811172 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\camera.cpp
+1403970493 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\camera.cpp
 	"../include/Camera.h"
 
-1403811172 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\point3d.cpp
+1403986123 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\point3d.cpp
 	"../include/Point3D.h"
+	<cmath>
 

@@ -13,6 +13,10 @@ class Point3D
         GLfloat getX() const;
         GLfloat getY() const;
         GLfloat getZ() const;
+
+        int getMatrixX() const;
+        int getMatrixZ() const;
+
         void setX(GLfloat x);
         void setY(GLfloat y);
         void setZ(GLfloat z);

@@ -43,6 +43,18 @@ GLfloat Point3D::getZ() const
     return this->z;
 }
 
+
+int Point3D::getMatrixX() const
+{
+    return 24/2 + (int) floor(this->x); // 24 é o planesize
+}
+
+int Point3D::getMatrixZ() const
+{
+    return 24/2 + (int) floor(this->z); //24 é o planesize e estou com preguiça defazer isso direto
+}
+
+
 void Point3D::setX(GLfloat x)
 {
     this->values[0] = this->x = x;
