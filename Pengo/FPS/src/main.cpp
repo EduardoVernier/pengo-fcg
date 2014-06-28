@@ -1,26 +1,3 @@
-/**
-Laboratorio FCG - Pratica 4
-Ultima modificacao: 07/05/2014 - Acompanha bibliotecas: 3DObject.cpp(.h), bitmap.c(.h), glm.cpp,
-glmimg.cpp, Texture.cpp(Texture.h)
-
-Implementa a movimentação simples de uma camera em primeira pessoa para um personagem que anda
-sobre um plano. Utiliza a biblioteca bitmap para carregamento simples de texturas, glm + 3DObject
-para modelos OBJ e glmimg + Texture para aplicacao de texturas TGA sobre os modelos carregados
-
-Tarefas:
-
-1 - Adicionar neblina à cena ao implementar a função enableFog() com os parâmetros de habilitação
-de fog na OpenGL;
-2 - Usar uma imagem no formato BMP como mapa pra posicionar objetos 3D na cena. Use a cor de cada
-pixel para definir qual o modelo será colocado, e a posição do pixel para definir a posição do
-modelo no espaço. Pixels pretos não representam nenhum modelo, a posição fica vazia na cena;
-3 - Mudar as configurações da fonte de luz da cena, já implementada no código base dado, para que
-seja uma spotlight;
-4 - Adicionar uma segunda fonte de luz que fique girando ao redor do cenário.
-*/
-
-
-
 #include <windows.h>
 
 #include <stdio.h>
@@ -413,7 +390,7 @@ void mainInit() {
 	setWindow();
 	setViewport(0, windowWidth, 0, windowHeight);
 
-    ceilingCamera.set_eye(0.0, 7.0, 0.0);
+    ceilingCamera.set_eye(0.0, 32.0, 0.0);
     ceilingCamera.set_center(0.0, -1.0, 0.0);
     ceilingCamera.set_upvector(1.0, 0.0, 0.0);
 	// habilita remocao de faces ocultas
@@ -981,8 +958,8 @@ void mainRender() {
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
-    ceilingCamera.set_center(posX, -1, posZ);
+	ceilingCamera.set_eye(0, ceilingCamera.get_eye().getY(), 0);
+    ceilingCamera.set_center(0, -1, 0);
     ceilingCamera.callGluLookAt();
 
     renderScene();
