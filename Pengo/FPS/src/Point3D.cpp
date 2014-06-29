@@ -65,11 +65,10 @@ void Point3D::set_coords(GLfloat x, GLfloat y, GLfloat z)
 
 Point3D Point3D::operator-(const Point3D& other) const
 {
-    Point3D p(
-              this->getX() - other.getX(),
-              this->getY() - other.getY(),
-              this->getZ() - other.getZ());
-    return p;
+    return Point3D(
+           this->getX() - other.getX(),
+           this->getY() - other.getY(),
+           this->getZ() - other.getZ());
 }
 
 Point3D Point3D::operator+(const Point3D& other) const
