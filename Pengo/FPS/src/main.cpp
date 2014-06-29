@@ -1,26 +1,3 @@
-/**
-Laboratorio FCG - Pratica 4
-Ultima modificacao: 07/05/2014 - Acompanha bibliotecas: 3DObject.cpp(.h), bitmap.c(.h), glm.cpp,
-glmimg.cpp, Texture.cpp(Texture.h)
-
-Implementa a movimentação simples de uma camera em primeira pessoa para um personagem que anda
-sobre um plano. Utiliza a biblioteca bitmap para carregamento simples de texturas, glm + 3DObject
-para modelos OBJ e glmimg + Texture para aplicacao de texturas TGA sobre os modelos carregados
-
-Tarefas:
-
-1 - Adicionar neblina à cena ao implementar a função enableFog() com os parâmetros de habilitação
-de fog na OpenGL;
-2 - Usar uma imagem no formato BMP como mapa pra posicionar objetos 3D na cena. Use a cor de cada
-pixel para definir qual o modelo será colocado, e a posição do pixel para definir a posição do
-modelo no espaço. Pixels pretos não representam nenhum modelo, a posição fica vazia na cena;
-3 - Mudar as configurações da fonte de luz da cena, já implementada no código base dado, para que
-seja uma spotlight;
-4 - Adicionar uma segunda fonte de luz que fique girando ao redor do cenário.
-*/
-
-
-
 #include <windows.h>
 
 #include <stdio.h>
@@ -148,14 +125,16 @@ void updateState();
 void renderFloor();
 void updateCam();
 void setTextureToOpengl(Texture&);
-
 time_t startTime;
+void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
+bool futurePengoCollision (float pengoX, float pengoZ);
+int mapToMatrixCoordinates (float i);
 
 /**
 Screen dimensions
 */
-int windowWidth = 1024;
-int windowHeight = 768;
+int windowWidth = 800;
+int windowHeight = 640;
 
 /**
 Screen position
@@ -195,7 +174,6 @@ float headPosAux = 0.0f;
 
 float maxSpeed = 0.25f;
 
-float planeSize = 25.0f;
 
 // more sound stuff (position, speed and orientation of the listener)
 ALfloat listenerPos[]={0.0,0.0,4.0};
@@ -253,6 +231,9 @@ Texture chao, iceCube;
 //CModelAl modelAL;
 Camera pengoCamera, ceilingCamera;
 Point3D pengoPosition;
+const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
+OBJ_ENUM collisionMatrix [planeSize][planeSize];
+
 void setWindow() {
 
 	glMatrixMode(GL_PROJECTION);
@@ -298,8 +279,14 @@ void updateCam() {
 	source0Pos[1] = posY;
 	source0Pos[2] = posZ;
 
+    /*
+	int cMatrixX = planeSize/2 + (int) floor(posX);
+	int cMatrixZ = planeSize/2 + (int) floor(posZ);
 
-
+    printf("x: %f z: %f - ", posX, posZ);
+    printf("Mx: %d Mz: %d - ", cMatrixX, cMatrixZ);
+    printf("Col: %d\n ", collisionMatrix[cMatrixX][cMatrixZ]);
+*/
     //glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, {});
     /*
     GLfloat light_direction[] = {
@@ -404,7 +391,7 @@ void mainInit() {
 	setWindow();
 	setViewport(0, windowWidth, 0, windowHeight);
 
-    ceilingCamera.set_eye(0.0, 7.0, 0.0);
+    ceilingCamera.set_eye(0.0, 32.0, 0.0);
     ceilingCamera.set_center(0.0, -1.0, 0.0);
     ceilingCamera.set_upvector(1.0, 0.0, 0.0);
 	// habilita remocao de faces ocultas
@@ -589,6 +576,7 @@ void initTexture(void)
     int aux = 0;
     int length = (sceneInfo->bmiHeader.biWidth * 3 + 3) & ~3;
     int x;
+
     for (int y = 0; y < (sceneInfo)->bmiHeader.biHeight; y ++)
         for (GLubyte *ptr = sceneBmp + y * length, x = sceneInfo->bmiHeader.biWidth;
             x > 0;
@@ -742,19 +730,31 @@ void renderScene() {
     {
         for (int j = 0; j < sceneWidth; ++j)
         {
+            GLfloat x = i - (sceneHeight/2) + 0.5f;
+            GLfloat y = 0.5f;
+            GLfloat z = j - (sceneWidth/2) + 0.5f;
+
+
+            GLint xAtMatrix = planeSize/2 + (int) floor(x) ;
+            GLint zAtMatrix = planeSize/2 + (int) floor(z) ;
+
             glPushMatrix();
-            glTranslatef(0.5f + (i * (planeSize/sceneWidth)) - planeSize/2.0f, 1.0, 0.5f + (j * (planeSize/sceneHeight)) - planeSize/2.0f );
-            float cubeSide =2.f;
+            glTranslatef(x, y ,z);
+            float cubeSide =1; // numero magico é 1.8
             switch (sceneMatrix[i*sceneWidth + j])
             {
             case ICECUBE:
                 drawCube(cubeSide);
+                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,ICECUBE);
                 break;
             case PENGO:
                 pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
+                collisionMatrix[xAtMatrix][zAtMatrix] = PENGO;
                 break;
             case BALL:
                 ball.Draw(SMOOTH_MATERIAL_TEXTURE);
+                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,BALL);
                 break;
             case NOTHING:
             default:
@@ -778,6 +778,57 @@ void renderScene() {
 	//modelAL.Translate(0.0f,1.0f,0.0f);
 	//modelAL.Draw();
 }
+
+void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
+    //   . . .   8 neighborhood fill
+    //   . x .
+    //   . . .
+
+    if (obj == ICECUBE){ // vizinhança 4
+        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
+
+    if (xAtMatrix-1 > 0)
+        collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
+    if (xAtMatrix+1 < planeSize)
+        collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
+    if (zAtMatrix-1 > 0)
+        collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
+    if (zAtMatrix + 1 < planeSize)
+        collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+    }
+    else {
+        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
+
+        if (xAtMatrix-1 > 0)
+            collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
+        if (xAtMatrix+1 < planeSize)
+            collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
+
+        if (zAtMatrix-1 > 0){
+            collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
+
+            if (xAtMatrix-1 > 0)
+                collisionMatrix[xAtMatrix-1][zAtMatrix-1] = obj;
+
+            if (xAtMatrix+1 < planeSize)
+                collisionMatrix[xAtMatrix+1][zAtMatrix-1] = obj;
+        }
+
+        if (zAtMatrix + 1 < planeSize){
+            collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+
+            if (xAtMatrix-1 > 0)
+                collisionMatrix[xAtMatrix-1][zAtMatrix+1] = obj;
+
+            if (xAtMatrix+1 < planeSize)
+                collisionMatrix[xAtMatrix+1][zAtMatrix+1] = obj;
+        }
+
+    }
+
+}
+
+
 void updateState() {
 
 	if (upPressed || downPressed || rightPressed || leftPressed) {
@@ -796,25 +847,77 @@ void updateState() {
 		}
 
         if (upPressed) {
-            posX += speedX;
-            posZ += speedZ;
+            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+                posX += speedX;
+                posZ += speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
+
         }
         if (downPressed) {
-            posX -= speedX;
-            posZ -= speedZ;
+
+            if (futurePengoCollision(posX - speedX, posZ - speedZ)==false){
+                posX -= speedX;
+                posZ -= speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
         }
 
         if (rightPressed){
             speedX = -0.05 * sin((roty-180)*PI/180+(3.14/2));
 			speedZ = 0.05 * cos((roty)*PI/180+(3.14/2));
-            posX += speedX;
-            posZ += speedZ;
+
+            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+                posX += speedX;
+                posZ += speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
         }
         if (leftPressed){
             speedX = -0.05 * sin((roty-180)*PI/180-(3.14/2));
 			speedZ = 0.05 * cos((roty)*PI/180-(3.14/2));
-            posX += speedX;
-            posZ += speedZ;
+            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+                posX += speedX;
+                posZ += speedZ;
+            }
+            else {
+                if (futurePengoCollision(posX + speedX, posZ)==false){
+                    posX += speedX;
+                }
+                else{
+                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                        posZ += speedZ;
+                    }
+                }
+            }
+
         }
 
 
@@ -851,7 +954,41 @@ void updateState() {
 		}
 	}
 
+
 }
+
+bool futurePengoCollision (float pengoX, float pengoZ){
+    int x = mapToMatrixCoordinates(pengoX);
+    int z = mapToMatrixCoordinates(pengoZ);
+
+    return collisionMatrix[x][z] != NOTHING;
+    //gambiarra pra lidar com o erro do tamanho do bloco
+    /*
+    if (collisionMatrix[x][z] != NOTHING){
+        float mX = x-12; //24 é o tamanho da matriz, refatorarei no futuro
+        float mZ = z-12;
+
+        float distFromCenterOfPoligon = ::sqrt(
+                  std::pow(mX - pengoX, 2) +
+                  std::pow(mZ - pengoZ, 2));
+
+        printf ("%f \n", distFromCenterOfPoligon);
+        if (distFromCenterOfPoligon > 1) // touching threshold
+            return false;
+        else
+            return true;
+    }
+    else
+        return false;
+*/
+}
+
+int mapToMatrixCoordinates (float i){
+    return planeSize/2 + (int) floor(i);
+}
+
+
+
 
 void getTimeString(int minutes, int seconds, char *out)
 {
@@ -899,8 +1036,8 @@ void mainRender() {
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	ceilingCamera.set_eye(posX, ceilingCamera.get_eye().getY(), posZ);
-    ceilingCamera.set_center(posX, -1, posZ);
+	ceilingCamera.set_eye(0, ceilingCamera.get_eye().getY(), 0);
+    ceilingCamera.set_center(0, -1, 0);
     ceilingCamera.callGluLookAt();
 
     renderScene();
