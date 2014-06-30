@@ -9,6 +9,8 @@
 #include <iostream>
 #include <gl/glut.h>
 #include <string>
+#include <vector>
+using std::vector;
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -41,8 +43,7 @@ typedef struct
     GLubyte r, g, b, a;
 } S_COLOR ;
 
-typedef enum { NOTHING, ICECUBE, PENGO, STONECUBE, ITEM_BLOCK_CREATION, ITEM_PLAYER_SPEED } OBJ_ENUM;
-enum CAMERA_TYPES { FIRST_PERSON, THIRD_PERSON, CEILING_VISION };
+#include "../include/ObjEnum.h"
 OBJ_ENUM *sceneMatrix;
 
 GLfloat cube[6][4][3] =
@@ -232,7 +233,8 @@ Texture chao, iceCube, stoneCube;
 Camera pengoCamera, ceilingCamera, fpCamera;
 Point3D pengoPosition;
 const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
-OBJ_ENUM collisionMatrix [planeSize][planeSize];
+//OBJ_ENUM collisionMatrix [planeSize][planeSize];
+vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, NOTHING));
 
 CAMERA_TYPES current_camera = THIRD_PERSON;
 void setWindow() {
@@ -621,9 +623,13 @@ void initTexture(void)
             else if (cor == 0xFF0000)
                 sceneMatrix[aux] = STONECUBE;
             else if (cor == 0x0000FF)
-                sceneMatrix[aux] = PENGO;
+                sceneMatrix[aux] = ENEMY;
             else if (cor == 0x00FF00)
                 sceneMatrix[aux] = ICECUBE;
+            else if (cor == 0xFFFF00)
+                sceneMatrix[aux] = ITEM_BLOCK_CREATION;
+            else if (cor == 0x00FFFF)
+                sceneMatrix[aux] = ITEM_PLAYER_SPEED;
             else sceneMatrix[aux] = NOTHING;
             aux++;
 	    }
@@ -785,12 +791,18 @@ void renderScene() {
                 break;
             case PENGO:
                 pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
-                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
-                collisionMatrix[xAtMatrix][zAtMatrix] = PENGO;
+                //fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
+                //collisionMatrix[xAtMatrix][zAtMatrix] = PENGO;
                 break;
             case STONECUBE:
                 drawCube(cubeSide, STONECUBE);
                 fillCollisionMatrix8 (xAtMatrix,zAtMatrix,STONECUBE);
+                break;
+            case ENEMY:
+                // Enemies are currently upside down Pengos.
+                glRotatef(180,0.0, 0.0, 1.0);
+                pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+                fillCollisionMatrix8(xAtMatrix, zAtMatrix, ENEMY);
                 break;
             case NOTHING:
             default:
@@ -998,7 +1010,7 @@ bool futurePengoCollision (float pengoX, float pengoZ){
     int x = mapToMatrixCoordinates(pengoX);
     int z = mapToMatrixCoordinates(pengoZ);
 
-    return collisionMatrix[x][z] != NOTHING;
+    return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
     //gambiarra pra lidar com o erro do tamanho do bloco
     /*
     if (collisionMatrix[x][z] != NOTHING){

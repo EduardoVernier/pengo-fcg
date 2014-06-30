@@ -1040,7 +1040,7 @@
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1404097939 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+1404104979 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
@@ -1050,10 +1050,12 @@
 	<iostream>
 	<gl/glut.h>
 	<string>
+	<vector>
 	"../include/al/alut.h"
 	"../include/bitmap.h"
 	"../include/3DObject.h"
 	"../include/Camera.h"
+	"../include/ObjEnum.h"
 
 1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\al\alut.h
 	<al/alc.h>
@@ -1075,14 +1077,14 @@
 	<gl/glut.h>
 	"../include/Point3D.h"
 
-1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\gl.h
+1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\gl.h
 
-1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\glut.h
+1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\glut.h
 	<windows.h>
 	<GL/gl.h>
 	<GL/glu.h>
 
-1403806563 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\glu.h
+1403812254 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\gl\glu.h
 	<stddef.h>
 	<GL/gl.h>
 
@@ -1109,4 +1111,16 @@
 1403986123 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\src\point3d.cpp
 	"../include/Point3D.h"
 	<cmath>
+
+1404104036 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\enemy.cpp
+	"../include/Enemy.h"
+
+1404103682 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\enemy.h
+	<iostream>
+	<vector>
+	"../include/ObjEnum.h"
+	<random>
+	<chrono>
+
+1404102175 c:\users\userseven\documents\github\pengo-fcg\pengo\fps\include\objenum.h
 
