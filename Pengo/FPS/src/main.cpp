@@ -41,7 +41,7 @@ typedef struct
     GLubyte r, g, b, a;
 } S_COLOR ;
 
-typedef enum { NOTHING, ICECUBE, PENGO, BALL } OBJ_ENUM;
+typedef enum { NOTHING, ICECUBE, PENGO, STONECUBE, ITEM_BLOCK_CREATION, ITEM_PLAYER_SPEED } OBJ_ENUM;
 enum CAMERA_TYPES { FIRST_PERSON, THIRD_PERSON, CEILING_VISION };
 OBJ_ENUM *sceneMatrix;
 
@@ -227,7 +227,7 @@ float backgroundColor[4] = {0.0, 0.0, 0.0, 1.0};
 float light1Angle = 0.0f;
 
 C3DObject ball, flower, pengo;
-Texture chao, iceCube;
+Texture chao, iceCube, stoneCube;
 //CModelAl modelAL;
 Camera pengoCamera, ceilingCamera, fpCamera;
 Point3D pengoPosition;
@@ -561,6 +561,31 @@ void initTexture(void)
     }
     setTextureToOpengl(iceCube);
 
+    free(iceBits);
+    iceBits = LoadDIBitmap("stones.bmp", &(stoneCube.info));
+    if (iceBits == (GLubyte*) 0) {
+        printf("Error loading stone cube texture!\n\n");
+        return;
+    }
+    stoneCube.type = GL_TEXTURE_2D;
+
+    glGenTextures(1, &(stoneCube.texture));
+    glBindTexture(stoneCube.type, stoneCube.texture);
+    int stoneLength = stoneCube.info->bmiHeader.biWidth * stoneCube.info->bmiHeader.biHeight;
+    stoneCube.rgba = (GLubyte*) malloc(stoneLength * 4);
+
+    for (stoneCube.rgbaptr = stoneCube.rgba, stoneCube.ptr = iceBits; stoneLength > 0; --stoneLength, stoneCube.rgbaptr += 4, stoneCube.ptr += 3)
+    {
+        stoneCube.rgbaptr[0] = stoneCube.ptr[2];
+        stoneCube.rgbaptr[1] = stoneCube.ptr[1];
+        stoneCube.rgbaptr[2] = stoneCube.ptr[0];
+        stoneCube.rgbaptr[3] = 255;
+    }
+
+    setTextureToOpengl(stoneCube);
+
+    free(iceBits);
+
     BITMAPINFO *sceneInfo = (BITMAPINFO*) malloc(sizeof(BITMAPINFO));
     GLubyte *sceneBmp = LoadDIBitmap("scene.bmp", &sceneInfo);
     if (sceneBmp == (GLubyte*) NULL) {
@@ -594,7 +619,7 @@ void initTexture(void)
             if (cor == 0x000000)
                 sceneMatrix[aux] = NOTHING;
             else if (cor == 0xFF0000)
-                sceneMatrix[aux] = BALL;
+                sceneMatrix[aux] = STONECUBE;
             else if (cor == 0x0000FF)
                 sceneMatrix[aux] = PENGO;
             else if (cor == 0x00FF00)
@@ -654,12 +679,15 @@ void enableFog(void)
     glFogi(GL_FOG_MODE, GL_EXP2);
 }
 
-void drawCube(float side)
+void drawCube(float side, OBJ_ENUM cubeType)
 {
     glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    glBindTexture(GL_TEXTURE_2D, iceCube.texture);
+    if (cubeType == ICECUBE)
+        glBindTexture(GL_TEXTURE_2D, iceCube.texture);
+    else if (cubeType == STONECUBE)
+        glBindTexture(GL_TEXTURE_2D, stoneCube.texture);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glPushMatrix();
     glScalef(side, side, side);
@@ -749,7 +777,10 @@ void renderScene() {
             switch (sceneMatrix[i*sceneWidth + j])
             {
             case ICECUBE:
-                drawCube(cubeSide);
+            case ITEM_BLOCK_CREATION:
+            case ITEM_PLAYER_SPEED:
+                drawCube(cubeSide, ICECUBE);
+                // SHOULD WE FILL IT WITH THE ITEMS AND NOT JUST "CUBES"?
                 fillCollisionMatrix8 (xAtMatrix,zAtMatrix,ICECUBE);
                 break;
             case PENGO:
@@ -757,9 +788,9 @@ void renderScene() {
                 fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
                 collisionMatrix[xAtMatrix][zAtMatrix] = PENGO;
                 break;
-            case BALL:
-                ball.Draw(SMOOTH_MATERIAL_TEXTURE);
-                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,BALL);
+            case STONECUBE:
+                drawCube(cubeSide, STONECUBE);
+                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,STONECUBE);
                 break;
             case NOTHING:
             default:
@@ -790,7 +821,7 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
     //   . x .
     //   . . .
 
-    if (obj == ICECUBE){ // vizinhança 4
+    if (obj == ICECUBE || obj == STONECUBE){ // vizinhança 4
         collisionMatrix[xAtMatrix][zAtMatrix] = obj;
 
         if (xAtMatrix-1 > 0)
