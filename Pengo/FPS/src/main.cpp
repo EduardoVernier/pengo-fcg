@@ -42,7 +42,7 @@ typedef struct
 } S_COLOR ;
 
 typedef enum { NOTHING, ICECUBE, PENGO, BALL } OBJ_ENUM;
-
+enum CAMERA_TYPES { FIRST_PERSON, THIRD_PERSON, CEILING_VISION };
 OBJ_ENUM *sceneMatrix;
 
 GLfloat cube[6][4][3] =
@@ -129,7 +129,7 @@ time_t startTime;
 void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
 bool futurePengoCollision (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
-
+CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
 /**
 Screen dimensions
 */
@@ -229,11 +229,12 @@ float light1Angle = 0.0f;
 C3DObject ball, flower, pengo;
 Texture chao, iceCube;
 //CModelAl modelAL;
-Camera pengoCamera, ceilingCamera;
+Camera pengoCamera, ceilingCamera, fpCamera;
 Point3D pengoPosition;
 const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
 OBJ_ENUM collisionMatrix [planeSize][planeSize];
 
+CAMERA_TYPES current_camera = THIRD_PERSON;
 void setWindow() {
 
 	glMatrixMode(GL_PROJECTION);
@@ -269,7 +270,11 @@ void updateCam() {
     pengoCamera.set_eye(pengoPosition + 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
     pengoCamera.set_center(pengoPosition);
     pengoCamera.set_upvector(0.0, 1.0, 0.0);
-	pengoCamera.callGluLookAt();
+	// pengoCamera.callGluLookAt();
+
+    fpCamera.set_eye(pengoPosition);
+    fpCamera.set_center(pengoPosition - 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
+
 
 	// atualiza a posição do listener e da origen do som, são as mesmas da camera, já que os passos vem de onde o personagem está
 	listenerPos[0] = posX;
@@ -763,6 +768,7 @@ void renderScene() {
             glPopMatrix();
         }
     }
+
     glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
@@ -787,14 +793,14 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
     if (obj == ICECUBE){ // vizinhança 4
         collisionMatrix[xAtMatrix][zAtMatrix] = obj;
 
-    if (xAtMatrix-1 > 0)
-        collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
-    if (xAtMatrix+1 < planeSize)
-        collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
-    if (zAtMatrix-1 > 0)
-        collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
-    if (zAtMatrix + 1 < planeSize)
-        collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+        if (xAtMatrix-1 > 0)
+            collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
+        if (xAtMatrix+1 < planeSize)
+            collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
+        if (zAtMatrix-1 > 0)
+            collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
+        if (zAtMatrix + 1 < planeSize)
+            collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
     }
     else {
         collisionMatrix[xAtMatrix][zAtMatrix] = obj;
@@ -1011,6 +1017,19 @@ void mainRender() {
 	glLoadIdentity();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	updateCam();
+	switch (current_camera)
+	{
+    case THIRD_PERSON:
+        pengoCamera.callGluLookAt();
+        break;
+    case FIRST_PERSON:
+        fpCamera.callGluLookAt();
+        break;
+    case CEILING_VISION:
+        ceilingCamera.callGluLookAt();
+        glDisable(GL_FOG);
+        break;
+	}
 	renderScene();
 	time_t now;
 	time(&now);
@@ -1036,8 +1055,8 @@ void mainRender() {
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	ceilingCamera.set_eye(0, ceilingCamera.get_eye().getY(), 0);
-    ceilingCamera.set_center(0, -1, 0);
+	ceilingCamera.set_eye(pengoPosition.getX(), ceilingCamera.get_eye().getY(), pengoPosition.getZ());
+    ceilingCamera.set_center(pengoPosition.getX(), -1, pengoPosition.getZ());
     ceilingCamera.callGluLookAt();
 
     renderScene();
@@ -1143,7 +1162,7 @@ Key press event handler
 */
 void onKeyDown(unsigned char key, int x, int y) {
 	//printf("%d \n", key);
-	switch (key) {
+	switch (tolower(key)) {
 		case 32: //space
 			if (!spacePressed && !jumping) {
 				jumping = true;
@@ -1183,7 +1202,7 @@ void onKeyDown(unsigned char key, int x, int y) {
 Key release event handler
 */
 void onKeyUp(unsigned char key, int x, int y) {
-	switch (key) {
+	switch (tolower(key)) {
 		case 32: //space
 			spacePressed = false;
 			break;
@@ -1211,6 +1230,9 @@ void onKeyUp(unsigned char key, int x, int y) {
 		case 27:
 			exit(0);
 			break;
+        case 'v':
+            current_camera = nextCamera(current_camera);
+            break;
 		default:
 			break;
 	}
@@ -1278,4 +1300,18 @@ int main(int argc, char **argv) {
 
     free(sceneMatrix);
     return 0;
+}
+
+
+CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera)
+{
+    switch (curCamera)
+    {
+    case THIRD_PERSON:
+        return FIRST_PERSON;
+    case FIRST_PERSON:
+        return CEILING_VISION;
+    case CEILING_VISION:
+        return THIRD_PERSON;
+    }
 }

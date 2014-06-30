@@ -1,6 +1,7 @@
 #include "../include/Camera.h"
 
 Camera::Camera()
+    : eye(0.0,0.0,0.0), center(0.0,0.0,0.0), up(0.0,1.0,0.0)
 {
     //ctor
 }
