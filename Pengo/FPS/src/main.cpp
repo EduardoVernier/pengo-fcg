@@ -131,6 +131,8 @@ void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
 bool futurePengoCollision (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
+void moveDatBlock();
+
 /**
 Screen dimensions
 */
@@ -765,6 +767,7 @@ void renderScene() {
     //glLoadIdentity();
     renderLights();
 
+
     for (int i = 0; i < sceneHeight; ++i)
     {
         for (int j = 0; j < sceneWidth; ++j)
@@ -841,13 +844,13 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
         collisionMatrix[xAtMatrix][zAtMatrix] = obj;
 
         if (xAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
+            collisionMatrix[xAtMatrix-1][zAtMatrix] = PADDING;
         if (xAtMatrix+1 < planeSize)
-            collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
+            collisionMatrix[xAtMatrix+1][zAtMatrix] = PADDING;
         if (zAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
+            collisionMatrix[xAtMatrix][zAtMatrix-1] = PADDING;
         if (zAtMatrix + 1 < planeSize)
-            collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
+            collisionMatrix[xAtMatrix][zAtMatrix+1] = PADDING;
     }
     else {
         collisionMatrix[xAtMatrix][zAtMatrix] = obj;
@@ -1010,11 +1013,64 @@ void updateState() {
 
 }
 
+void moveDatBlock(){
+    int direction = round(std::abs(int(roty) % 360)/90.0);
+    if (direction == 4)
+        direction = 0;
+    int tileAheadX = mapToMatrixCoordinates(posX);
+    int tileAheadZ = mapToMatrixCoordinates(posZ);
+
+    switch (direction){
+    case 0:
+        tileAheadZ -= 2;
+        break;
+    case 1:
+        tileAheadX += 2;
+        break;
+    case 2:
+        tileAheadZ += 2;
+        break;
+    case 3:
+        tileAheadX -= 2;
+        break;
+    }
+
+    printf ("   xA: %d zA: %d  obj: %d %d\n", tileAheadX, tileAheadZ,
+            collisionMatrix[tileAheadX][tileAheadZ],sceneMatrix[tileAheadX*sceneWidth+tileAheadZ]);
+
+
+    if (sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] == ICECUBE){
+            sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = NOTHING;
+            collisionMatrix[tileAheadX-1][tileAheadZ] = NOTHING;
+            collisionMatrix[tileAheadX+1][tileAheadZ] = NOTHING;
+            collisionMatrix[tileAheadX][tileAheadZ-1] = NOTHING;
+            collisionMatrix[tileAheadX][tileAheadZ+1] = NOTHING;
+
+            switch (direction){
+            case 0:
+                tileAheadZ -= 1;
+                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
+                break;
+            case 1:
+                tileAheadX += 1;
+                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
+                break;
+            case 2:
+                tileAheadZ += 1;
+                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
+                break;
+            case 3:
+                tileAheadX -= 1;
+                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
+                break;
+            }
+    }
+}
+
 bool futurePengoCollision (float pengoX, float pengoZ){
     int x = mapToMatrixCoordinates(pengoX);
     int z = mapToMatrixCoordinates(pengoZ);
-
-    return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
+        return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
     //gambiarra pra lidar com o erro do tamanho do bloco
     /*
     if (collisionMatrix[x][z] != NOTHING){
@@ -1211,11 +1267,7 @@ void onKeyDown(unsigned char key, int x, int y) {
 	//printf("%d \n", key);
 	switch (tolower(key)) {
 		case 32: //space
-			if (!spacePressed && !jumping) {
-				jumping = true;
-				speedY = jumpSpeed;
-			}
-			spacePressed = true;
+            moveDatBlock();
 			break;
 		case 119: //w
 			if (!upPressed) {
