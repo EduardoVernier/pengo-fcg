@@ -13,8 +13,11 @@
 				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
+					<Add option="-Wswitch-enum" />
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add directory="../include" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add library="..\lib\OpenGL32.Lib" />
@@ -33,6 +36,7 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add directory="../include" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -56,6 +60,8 @@
 		</Linker>
 		<Unit filename="include/3DObject.h" />
 		<Unit filename="include/Camera.h" />
+		<Unit filename="include/Enemy.h" />
+		<Unit filename="include/ObjEnum.h" />
 		<Unit filename="include/Point3D.h" />
 		<Unit filename="include/Texture.h" />
 		<Unit filename="include/al/EFX-Util.h" />
@@ -75,6 +81,7 @@
 		<Unit filename="include/glm.h" />
 		<Unit filename="src/3DObject.cpp" />
 		<Unit filename="src/Camera.cpp" />
+		<Unit filename="src/Enemy.cpp" />
 		<Unit filename="src/Point3D.cpp" />
 		<Unit filename="src/Texture.cpp" />
 		<Unit filename="src/bitmap.c">

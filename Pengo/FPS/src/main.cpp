@@ -436,7 +436,7 @@ void initModel() {
 	pengo.Init();
 	pengo.Load("penguin.obj");
 	flower.Init();
-	flower.Load("flowers.obj");
+	flower.Load("BR_Charizard.obj");
 	//modelAL = CModelAl();
 	//modelAL.Init();
 	printf("Models ok. \n \n \n");
@@ -800,8 +800,12 @@ void renderScene() {
                 break;
             case ENEMY:
                 // Enemies are currently upside down Pengos.
-                glRotatef(180,0.0, 0.0, 1.0);
-                pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+                //glRotatef(180,0.0, 0.0, 1.0);
+                //pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+                glTranslatef(0.0,0.4,0.0);
+                glRotatef(90,1.0,0.0,0.0);
+
+                flower.Draw(SMOOTH_MATERIAL_TEXTURE);
                 fillCollisionMatrix8(xAtMatrix, zAtMatrix, ENEMY);
                 break;
             case NOTHING:
@@ -919,12 +923,12 @@ void updateState() {
                 posZ -= speedZ;
             }
             else {
-                if (futurePengoCollision(posX + speedX, posZ)==false){
-                    posX += speedX;
+                if (futurePengoCollision(posX - speedX, posZ)==false){
+                    posX -= speedX;
                 }
                 else{
-                    if (futurePengoCollision(posX, posZ + speedZ)==false){
-                        posZ += speedZ;
+                    if (futurePengoCollision(posX, posZ - speedZ)==false){
+                        posZ -= speedZ;
                     }
                 }
             }
