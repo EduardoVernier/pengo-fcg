@@ -24,6 +24,20 @@ void MovableBlock::move(OBJ_ENUM* sceneMatrix)
 {
     this->move(sceneMatrix, this->speedX, this->speedZ);
 }
+// DANGER - UNTESTED ZONE
+void give_powerup(ITEMS which)
+{
+    extern int nBlocks;
+    extern float speed;
+    if (which == NBLOCKS)
+    {
+        nBlocks++;
+    }
+    else if (which == SPEED)
+    {
+        speed += 0.05f;
+    }
+}
 
 void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
 {
@@ -40,7 +54,7 @@ void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
         if (breakWhenStop){
             // CAN'T MOVE, SHOULD BREAK!
             this->isValid = false;
-
+            give_powerup(this->item);
         }
         this->moving = false;
         this->screenPosition = make_pair((float)this->matrixPosition.first - 12.0 + 0.5, (float)this->matrixPosition.second - 12.0 + 0.5);
@@ -97,3 +111,6 @@ void MovableBlock::insert_item(ITEMS which)
 {
     this->item = which;
 }
+
+
+

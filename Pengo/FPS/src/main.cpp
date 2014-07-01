@@ -136,6 +136,10 @@ int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
 void moveDatBlock();
 void gameOver();
+
+int nBlocks = 2;
+int speed = 0.05f;
+
 /**
 Screen dimensions
 */
@@ -981,11 +985,11 @@ void updateState() {
 if (pengoDead==false)
 	if (upPressed || downPressed || rightPressed || leftPressed ) {
 		if (running) {
-			speedX = 0.05 * sin((roty-180)*PI/180) * 2;
-			speedZ = -0.05 * cos((roty)*PI/180) * 2;
+			speedX = speed * sin((roty-180)*PI/180) * 2;
+			speedZ = -speed * cos((roty)*PI/180) * 2;
 		} else {
-			speedX = 0.05 * sin((roty-180)*PI/180);
-			speedZ = -0.05 * cos((roty)*PI/180);
+			speedX = speed * sin((roty-180)*PI/180);
+			speedZ = -speed * cos((roty)*PI/180);
 		}
 
 		// efeito de "sobe e desce" ao andar
@@ -1031,8 +1035,8 @@ if (pengoDead==false)
         }
 
         if (rightPressed){
-            speedX = -0.05 * sin((roty-180)*PI/180+(3.14/2));
-			speedZ = 0.05 * cos((roty)*PI/180+(3.14/2));
+            speedX = -speed * sin((roty-180)*PI/180+(3.14/2));
+			speedZ = speed * cos((roty)*PI/180+(3.14/2));
 
             if (collides(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
@@ -1050,8 +1054,8 @@ if (pengoDead==false)
             }
         }
         if (leftPressed){
-            speedX = -0.05 * sin((roty-180)*PI/180-(3.14/2));
-			speedZ = 0.05 * cos((roty)*PI/180-(3.14/2));
+            speedX = -speed * sin((roty-180)*PI/180-(3.14/2));
+			speedZ = speed * cos((roty)*PI/180-(3.14/2));
 
             if (collides(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
@@ -1618,3 +1622,4 @@ CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera)
         return THIRD_PERSON;
     }
 }
+
