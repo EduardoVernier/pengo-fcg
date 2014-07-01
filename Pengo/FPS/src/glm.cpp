@@ -16,11 +16,11 @@
 */
 
 //#include <stdafx.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <string.h>
-#include <assert.h>
+#include <cassert>
 #include "../include/glm.h"
 
 
@@ -107,7 +107,8 @@ glmNormalize(GLfloat* v)
  * that works fairly well is 0.000001.
  *
  * u - array of 3 GLfloats (GLfloat u[3])
- * v - array of 3 GLfloats (GLfloat v[3])
+ * v - array of 3 GLfloats (GLfloat v[3])    std::cout << sceneMatrix[(int)pengoX + 12 + ((int)pengoZ+12)*24] << std::endl;
+
  */
 static GLboolean
 glmEqual(GLfloat* u, GLfloat* v, GLfloat epsilon)

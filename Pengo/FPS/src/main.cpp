@@ -1,5 +1,5 @@
 #include <windows.h>
-
+#include "../include/collision.h"
 #include <stdio.h>
 #include <stdlib.h>
 //#include <math.h>
@@ -10,7 +10,9 @@
 #include <gl/glut.h>
 #include <string>
 #include <vector>
+#include <map>
 using std::vector;
+using std::map;
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -22,8 +24,9 @@ using std::vector;
 
 //handle generic obj models
 #include "../include/3DObject.h"
-
+#include "../include/Enemy.h"
 #include "../include/Camera.h"
+#include "../include/MovableBlock.h"
 
 #pragma comment(lib, "OpenAL32.lib")
 #pragma comment(lib, "alut.lib")
@@ -128,7 +131,7 @@ void updateCam();
 void setTextureToOpengl(Texture&);
 time_t startTime;
 void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
-bool futurePengoCollision (float pengoX, float pengoZ);
+bool collides (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
 void moveDatBlock();
@@ -238,6 +241,9 @@ const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
 //OBJ_ENUM collisionMatrix [planeSize][planeSize];
 vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, NOTHING));
 
+vector<Enemy> enemies;
+vector<MovableBlock*> blocks;
+map<pair<int,int>, MovableBlock*> blocksMap;
 CAMERA_TYPES current_camera = THIRD_PERSON;
 void setWindow() {
 
@@ -390,6 +396,26 @@ void setViewport(GLint left, GLint right, GLint bottom, GLint top) {
 	glViewport(left, bottom, right - left, top - bottom);
 }
 
+void initEnemies()
+{
+    for (int i = 0; i < 24; ++i)
+    {
+        for (int j = 0; j < 24; ++j)
+        {
+            if (sceneMatrix[i*24+j] == ENEMY)
+            {
+                Enemy x(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
+                enemies.push_back(x);
+            }
+            else if (sceneMatrix[i*24+j] == ICECUBE)
+            {
+                MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
+                blocksMap.insert(make_pair(make_pair(i,j), m));
+                blocks.push_back(m);
+            }
+        }
+    }
+}
 
 /**
 Initialize
@@ -415,6 +441,8 @@ void mainInit() {
     initSound();
 
     initTexture();
+
+    initEnemies();
 
 	initModel();
 
@@ -766,6 +794,7 @@ void renderScene() {
 	//glMatrixMode(GL_MODELVIEW);
     //glLoadIdentity();
     renderLights();
+    sceneMatrix[(int)std::round(pengoPosition.getX()-0.5) + 12 + ((int)std::round(pengoPosition.getZ()-0.5)+12)*24] = PENGO;
 
 
     for (int i = 0; i < sceneHeight; ++i)
@@ -785,23 +814,23 @@ void renderScene() {
             float cubeSide =1; // numero magico é 1.8
             switch (sceneMatrix[i*sceneWidth + j])
             {
-            case ICECUBE:
+            //case ICECUBE:
             case ITEM_BLOCK_CREATION:
             case ITEM_PLAYER_SPEED:
                 drawCube(cubeSide, ICECUBE);
                 // SHOULD WE FILL IT WITH THE ITEMS AND NOT JUST "CUBES"?
-                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,ICECUBE);
+//                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,ICECUBE);
                 break;
-            case PENGO:
-                pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+            //case PENGO:
+             //   pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
                 //fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
                 //collisionMatrix[xAtMatrix][zAtMatrix] = PENGO;
                 break;
             case STONECUBE:
                 drawCube(cubeSide, STONECUBE);
-                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,STONECUBE);
+                //fillCollisionMatrix8 (xAtMatrix,zAtMatrix,STONECUBE);
                 break;
-            case ENEMY:
+            /*case ENEMY:
                 // Enemies are currently upside down Pengos.
                 //glRotatef(180,0.0, 0.0, 1.0);
                 //pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
@@ -810,7 +839,7 @@ void renderScene() {
 
                 flower.Draw(SMOOTH_MATERIAL_TEXTURE);
                 fillCollisionMatrix8(xAtMatrix, zAtMatrix, ENEMY);
-                break;
+                break;*/
             case NOTHING:
             default:
                 break;
@@ -819,14 +848,42 @@ void renderScene() {
         }
     }
 
-    glPushMatrix();
+
+
+    for (Enemy& e : enemies)
+    {
+        e.move_me(sceneMatrix, 24, 24);
+        glPushMatrix();
+        glTranslatef(e.get_screen_pos().first, 0.6f, e.get_screen_pos().second);
+        glRotatef(90,1.0,0.0,0.0);
+        flower.Draw(SMOOTH_MATERIAL_TEXTURE);
+        glPopMatrix();
+    }
+
+    for (MovableBlock* b : blocks)
+    {
+        sceneMatrix[b->get_matrix_pos().first*24+b->get_matrix_pos().second] = NOTHING;
+        blocksMap[b->get_matrix_pos()] = NULL;
+        blocksMap.erase(b->get_matrix_pos());
+        if (!b->is_valid()) continue;
+        if (b->is_moving())
+            b->move(sceneMatrix);
+        sceneMatrix[b->get_matrix_pos().first*24+b->get_matrix_pos().second] = ICECUBE;
+        blocksMap.insert(make_pair(b->get_matrix_pos(), b));
+        glPushMatrix();
+        glTranslatef(b->get_screen_pos().first, 0.6f, b->get_screen_pos().second);
+        drawCube(1.0, ICECUBE);
+        glPopMatrix();
+    }
+
+     glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
         glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+
     }
     glPopMatrix();
-
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
@@ -834,7 +891,7 @@ void renderScene() {
 	//modelAL.Translate(0.0f,1.0f,0.0f);
 	//modelAL.Draw();
 }
-
+/*
 void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
     //   . . .   8 neighborhood fill
     //   . x .
@@ -883,7 +940,7 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
     }
 
 }
-
+*/
 
 void updateState() {
 
@@ -903,16 +960,17 @@ void updateState() {
 		}
 
         if (upPressed) {
-            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+
+            if (collides(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
                 posZ += speedZ;
             }
             else {
-                if (futurePengoCollision(posX + speedX, posZ)==false){
+                if (collides(posX + speedX, posZ)==false){
                     posX += speedX;
                 }
                 else{
-                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                    if (collides(posX, posZ + speedZ)==false){
                         posZ += speedZ;
                     }
                 }
@@ -921,16 +979,16 @@ void updateState() {
         }
         if (downPressed) {
 
-            if (futurePengoCollision(posX - speedX, posZ - speedZ)==false){
+            if (collides(posX - speedX, posZ - speedZ)==false){
                 posX -= speedX;
                 posZ -= speedZ;
             }
             else {
-                if (futurePengoCollision(posX - speedX, posZ)==false){
+                if (collides(posX - speedX, posZ)==false){
                     posX -= speedX;
                 }
                 else{
-                    if (futurePengoCollision(posX, posZ - speedZ)==false){
+                    if (collides(posX, posZ - speedZ)==false){
                         posZ -= speedZ;
                     }
                 }
@@ -941,16 +999,16 @@ void updateState() {
             speedX = -0.05 * sin((roty-180)*PI/180+(3.14/2));
 			speedZ = 0.05 * cos((roty)*PI/180+(3.14/2));
 
-            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+            if (collides(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
                 posZ += speedZ;
             }
             else {
-                if (futurePengoCollision(posX + speedX, posZ)==false){
+                if (collides(posX + speedX, posZ)==false){
                     posX += speedX;
                 }
                 else{
-                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                    if (collides(posX, posZ + speedZ)==false){
                         posZ += speedZ;
                     }
                 }
@@ -959,16 +1017,17 @@ void updateState() {
         if (leftPressed){
             speedX = -0.05 * sin((roty-180)*PI/180-(3.14/2));
 			speedZ = 0.05 * cos((roty)*PI/180-(3.14/2));
-            if (futurePengoCollision(posX + speedX, posZ + speedZ)==false){
+
+            if (collides(posX + speedX, posZ + speedZ)==false){
                 posX += speedX;
                 posZ += speedZ;
             }
             else {
-                if (futurePengoCollision(posX + speedX, posZ)==false){
+                if (collides(posX + speedX, posZ)==false){
                     posX += speedX;
                 }
                 else{
-                    if (futurePengoCollision(posX, posZ + speedZ)==false){
+                    if (collides(posX, posZ + speedZ)==false){
                         posZ += speedZ;
                     }
                 }
@@ -1017,6 +1076,38 @@ void moveDatBlock(){
     int direction = round(std::abs(int(roty) % 360)/90.0);
     if (direction == 4)
         direction = 0;
+    std::cout << direction << std::endl;
+    int x = (int) (std::round(pengoPosition.getX()-0.5) + 12);
+    int z = (int) (std::round(pengoPosition.getZ()-0.5) + 12);
+    std::cout << "Pengo square:" << x << ", " << z << std::endl;
+    int speedX, speedZ;
+    switch (direction) {
+
+    case 0:
+        speedZ = -1;
+        speedX = 0;
+        break;
+    case 1:
+        speedX = 1;
+        speedZ = 0;
+        break;
+    case 2:
+        speedZ = 1;
+        speedX = 0;
+        break;
+    case 3:
+        speedX = -1;
+        speedZ = 0;
+        break;
+    }
+
+    if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
+    {
+        MovableBlock *b = blocksMap[make_pair(x+2*speedX,z+2*speedZ)];
+        b->start_moving(speedX, speedZ);
+    }
+
+    /*
     int tileAheadX = mapToMatrixCoordinates(posX);
     int tileAheadZ = mapToMatrixCoordinates(posZ);
 
@@ -1064,13 +1155,75 @@ void moveDatBlock(){
                 sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
                 break;
             }
-    }
+    }*/
 }
 
-bool futurePengoCollision (float pengoX, float pengoZ){
-    int x = mapToMatrixCoordinates(pengoX);
-    int z = mapToMatrixCoordinates(pengoZ);
-        return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
+bool collides (float pengoX, float pengoZ){
+    int direction = round(std::abs(int(roty) % 360)/45.0);
+    if (direction == 8)
+        direction = 0;
+
+    if (downPressed)
+        direction = (4+direction) % 8;
+    if (leftPressed)
+        direction = (6+direction) % 8;
+    if (rightPressed)
+        direction = (2+direction) % 8;
+    int z = (int)(std::round(pengoZ - 0.5)) + 12;
+    int x = + ((int) std::round(pengoX - 0.5)+12);
+    if (z <= 0 || z >= planeSize - 1 || x <= 0 || x >= planeSize - 1) return true;
+    bool helper = false;
+    switch (direction)
+    {
+    case 0:
+        z--;
+        return  sceneMatrix[(x-1)*24+z] != NOTHING ||
+                sceneMatrix[x*24+z] != NOTHING ||
+                sceneMatrix[(x+1)*24+z] != NOTHING;
+    case 1:
+        return  sceneMatrix[(x+1)*24+z-1] != NOTHING ||
+                sceneMatrix[x*24+z-1] != NOTHING ||
+                sceneMatrix[(x+1)*24+z] != NOTHING;
+        break;
+    case 2:
+        x++;
+        return  sceneMatrix[x*24+z-1] != NOTHING ||
+                sceneMatrix[x*24+z] != NOTHING ||
+                sceneMatrix[x*24+z+1] != NOTHING;
+        break;
+    case 3:
+        return  sceneMatrix[(x+1)*24+z] != NOTHING ||
+                sceneMatrix[(x+1)*24+z+1] != NOTHING ||
+                sceneMatrix[x*24+z+1] != NOTHING;
+        break;
+    case 4:
+        z++;
+        return sceneMatrix[(x+1)*24+z] != NOTHING ||
+                sceneMatrix[x*24+z] != NOTHING ||
+                sceneMatrix[(x-1)*24+z] != NOTHING;
+        break;
+    case 5:
+        return sceneMatrix[x*24+z+1] != NOTHING ||
+                sceneMatrix[(x-1)*24+z+1] != NOTHING ||
+                sceneMatrix[(x-1)*24+z] != NOTHING;
+        break;
+    case 6:
+        x--;
+        return  sceneMatrix[x*24+z-1] != NOTHING ||
+                sceneMatrix[x*24+z] != NOTHING ||
+                sceneMatrix[x*24+z+1] != NOTHING;
+        break;
+    case 7:
+        return sceneMatrix[(x-1)*24 + z] != NOTHING ||
+                sceneMatrix[(x-1)*24+z-1] != NOTHING ||
+                sceneMatrix[x*24 + z-1] != NOTHING;
+        break;
+
+    }
+    //int x = mapToMatrixCoordinates(pengoX);
+    //int z = mapToMatrixCoordinates(pengoZ);
+    // pengoX in [-12,12]
+    //return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
     //gambiarra pra lidar com o erro do tamanho do bloco
     /*
     if (collisionMatrix[x][z] != NOTHING){
@@ -1109,7 +1262,7 @@ Render scene
 */
 void mainRender() {
 
-
+    sceneMatrix[(int)std::round(pengoPosition.getX()-0.5) + 12 + ((int)std::round(pengoPosition.getZ()-0.5)+12)*24] = NOTHING;
 	updateState();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0,0,windowWidth, windowHeight);
@@ -1134,6 +1287,16 @@ void mainRender() {
         break;
 	}
 	renderScene();
+	glColor3f(1.0,1.0,0.0);
+    glBegin(GL_LINES);
+    for (int i = 0; i < 24; ++i)
+    {
+        glVertex3f(-12.0 + (float)i*1.f, 0.1, -12.0);
+        glVertex3f(-12.0 + (float)i*1.f, 0.1, 12.0);
+        glVertex3f(-12.0, 0.1, -12.0 + (float)i);
+        glVertex3f(12.0, 0.1, -12.0 + (float)i);
+    }
+    glEnd();
 	time_t now;
 	time(&now);
 
