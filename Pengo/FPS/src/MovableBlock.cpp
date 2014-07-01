@@ -36,7 +36,7 @@ void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
         if (breakWhenStop){
             // CAN'T MOVE, SHOULD BREAK!
             this->isValid = false;
-            givePowerup()
+
         }
         this->moving = false;
         this->screenPosition = make_pair((float)this->matrixPosition.first - 12.0 + 0.5, (float)this->matrixPosition.second - 12.0 + 0.5);
@@ -81,4 +81,9 @@ void MovableBlock::start_moving(int speedX, int speedZ)
     this->moving = true;
     this->speedX = speedX;
     this->speedZ = speedZ;
+}
+
+void MovableBlock::insert_item(ITEMS which)
+{
+    this->item = which;
 }

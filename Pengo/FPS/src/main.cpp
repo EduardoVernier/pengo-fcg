@@ -402,16 +402,33 @@ void initEnemies()
     {
         for (int j = 0; j < 24; ++j)
         {
-            if (sceneMatrix[i*24+j] == ENEMY)
+            OBJ_ENUM value = sceneMatrix[i*24 + j];
+            if (value == ENEMY)
             {
                 Enemy x(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 enemies.push_back(x);
             }
-            else if (sceneMatrix[i*24+j] == ICECUBE || sceneMatrix[i*24+j] == ITEM_BLOCK_CREATION || sceneMatrix[i*24+j] == ITEM_PLAYER_SPEED)
+            else if (value == ICECUBE)
             {
                 MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 blocksMap.insert(make_pair(make_pair(i,j), m));
                 blocks.push_back(m);
+            }
+            else if (value == ITEM_BLOCK_CREATION)
+            {
+                MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
+                m->insert_item(NBLOCKS);
+                blocksMap.insert(make_pair(make_pair(i,j), m));
+                blocks.push_back(m);
+                sceneMatrix[i*24+j] = ICECUBE;
+            }
+            else if (value == ITEM_PLAYER_SPEED)
+            {
+                MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
+                m->insert_item(SPEED);
+                blocksMap.insert(make_pair(make_pair(i,j),m));
+                blocks.push_back(m);
+                sceneMatrix[i*24+j] = ICECUBE;
             }
         }
     }
@@ -814,13 +831,6 @@ void renderScene() {
             float cubeSide =1; // numero magico é 1.8
             switch (sceneMatrix[i*sceneWidth + j])
             {
-            //case ICECUBE:
-            case ITEM_BLOCK_CREATION:
-            case ITEM_PLAYER_SPEED:
-                drawCube(cubeSide, ICECUBE);
-                // SHOULD WE FILL IT WITH THE ITEMS AND NOT JUST "CUBES"?
-//                fillCollisionMatrix8 (xAtMatrix,zAtMatrix,ICECUBE);
-                break;
             //case PENGO:
              //   pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
                 //fillCollisionMatrix8 (xAtMatrix,zAtMatrix,PENGO);
