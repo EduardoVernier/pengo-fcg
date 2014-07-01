@@ -9,10 +9,17 @@
 #include <iostream>
 #include <gl/glut.h>
 #include <string>
+
+
+/// STL INCLUSIONS
 #include <vector>
 #include <map>
+#include <list>
 using std::vector;
 using std::map;
+using std::list;
+
+
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -138,7 +145,7 @@ void moveDatBlock();
 void gameOver();
 
 int nBlocks = 2;
-int speed = 0.05f;
+float speed = 0.05f;
 
 /**
 Screen dimensions
@@ -248,6 +255,8 @@ vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, 
 vector<Enemy> enemies;
 vector<MovableBlock*> blocks;
 map<pair<int,int>, MovableBlock*> blocksMap;
+list<pair<time_t, MovableBlock*>> blocksToSpawn;
+
 CAMERA_TYPES current_camera = THIRD_PERSON;
 bool pengoDead = false;
 bool hitFlag = false;
@@ -270,19 +279,9 @@ GLfloat eyeX, eyeY, eyeZ, cntrX, cntrY, cntrZ;
 Atualiza a posição e orientação da camera
 */
 void updateCam() {
-    /*
-    eyeX = posX;
-    eyeY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180));
-    eyeZ = posZ;
-    cntrX = posX + sin(roty*PI/180);
-    cntrY = posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180);
-    cntrZ = posZ - cos(roty*PI/180);
-    */
+
     pengoPosition.set_coords(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) , posZ);
-    /*
-    pengoCamera.set_eye(posX, posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)), posZ);
-    pengoCamera.set_center(posX + sin(roty*PI/180), posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180), posZ - cos(roty*PI/180));
-    */
+
     pengoCamera.set_eye(pengoPosition + 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
     pengoCamera.set_center(pengoPosition);
     pengoCamera.set_upvector(0.0, 1.0, 0.0);
@@ -299,27 +298,6 @@ void updateCam() {
 	source0Pos[0] = posX;
 	source0Pos[1] = posY;
 	source0Pos[2] = posZ;
-
-    /*
-	int cMatrixX = planeSize/2 + (int) floor(posX);
-	int cMatrixZ = planeSize/2 + (int) floor(posZ);
-
-    printf("x: %f z: %f - ", posX, posZ);
-    printf("Mx: %d Mz: %d - ", cMatrixX, cMatrixZ);
-    printf("Col: %d\n ", collisionMatrix[cMatrixX][cMatrixZ]);
-*/
-    //glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, {});
-    /*
-    GLfloat light_direction[] = {
-        cntrX - eyeX,
-        cntrY - eyeY,
-        cntrZ - eyeZ
-    };
-    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
-    */
-
-
-
 }
 
 void updateLights()
@@ -690,21 +668,7 @@ void initTexture(void)
 
     free(sceneInfo);
     free(sceneBmp);
-    // sceneInfo = NULL;
-    /*
-	// Set texture parameters
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    glTexImage2D(type, 0, 4, info->bmiHeader.biWidth, info->bmiHeader.biHeight,
-                  0, GL_RGBA, GL_UNSIGNED_BYTE, rgba );
-
-    */
-    printf("Textura %d\n", texture);
-    printf("Textura %d\n", iceTexture);
-	printf("Textures ok.\n\n", texture);
 
 }
 
@@ -743,11 +707,19 @@ void drawCube(float side, OBJ_ENUM cubeType)
     glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     if (cubeType == ICECUBE)
         glBindTexture(GL_TEXTURE_2D, iceCube.texture);
     else if (cubeType == STONECUBE)
         glBindTexture(GL_TEXTURE_2D, stoneCube.texture);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    else if (cubeType == NOTHING)
+    {
+        glDisable(GL_TEXTURE_2D);
+        glColor4f(1.0,1.0,1.0,0.5);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
     glPushMatrix();
     glScalef(side, side, side);
     for (int i = 5; i >= 0; --i)
@@ -810,7 +782,12 @@ void renderFloor() {
 
 	glPopMatrix();
 }
-
+bool hasBeenDrawn(pair<time_t, MovableBlock*> x)
+{
+    time_t now;
+    time(&now);
+    return difftime(now, x.first) >= 2.0;
+};
 void renderScene() {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
 	  // limpar o depth buffer
@@ -863,7 +840,29 @@ void renderScene() {
             glPopMatrix();
         }
     }
+    for (pair<time_t, MovableBlock*> p : blocksToSpawn)
+    {
+        time_t now;
+        time(&now);
+        double diff = difftime(now, p.first);
+        if (diff >= 2.0)
+        {
+            blocks.push_back(p.second);
+            nBlocks++;
+        }
+        else
+        {
+            glPushMatrix();
+            {
 
+                glTranslatef(p.second->get_screen_pos().first, 0.6f, p.second->get_screen_pos().second);
+                drawCube(1.0, NOTHING);
+
+            }
+            glPopMatrix();
+        }
+    }
+    blocksToSpawn.remove_if(hasBeenDrawn);
 
     for (MovableBlock* b : blocks)
     {
@@ -896,7 +895,7 @@ void renderScene() {
 
 
 
-    if (pengoDead == false){
+    if (!pengoDead){
     glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
@@ -919,60 +918,11 @@ void renderScene() {
     //setTextureToOpengl(chao);
 	renderFloor();
 
+
+
 	//modelAL.Translate(0.0f,1.0f,0.0f);
 	//modelAL.Draw();
 }
-/*
-void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
-    //   . . .   8 neighborhood fill
-    //   . x .
-    //   . . .
-
-    if (obj == ICECUBE || obj == STONECUBE){ // vizinhança 4
-        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
-
-        if (xAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix-1][zAtMatrix] = PADDING;
-        if (xAtMatrix+1 < planeSize)
-            collisionMatrix[xAtMatrix+1][zAtMatrix] = PADDING;
-        if (zAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix][zAtMatrix-1] = PADDING;
-        if (zAtMatrix + 1 < planeSize)
-            collisionMatrix[xAtMatrix][zAtMatrix+1] = PADDING;
-    }
-    else {
-        collisionMatrix[xAtMatrix][zAtMatrix] = obj;
-
-        if (xAtMatrix-1 > 0)
-            collisionMatrix[xAtMatrix-1][zAtMatrix] = obj;
-        if (xAtMatrix+1 < planeSize)
-            collisionMatrix[xAtMatrix+1][zAtMatrix] = obj;
-
-        if (zAtMatrix-1 > 0){
-            collisionMatrix[xAtMatrix][zAtMatrix-1] = obj;
-
-            if (xAtMatrix-1 > 0)
-                collisionMatrix[xAtMatrix-1][zAtMatrix-1] = obj;
-
-            if (xAtMatrix+1 < planeSize)
-                collisionMatrix[xAtMatrix+1][zAtMatrix-1] = obj;
-        }
-
-        if (zAtMatrix + 1 < planeSize){
-            collisionMatrix[xAtMatrix][zAtMatrix+1] = obj;
-
-            if (xAtMatrix-1 > 0)
-                collisionMatrix[xAtMatrix-1][zAtMatrix+1] = obj;
-
-            if (xAtMatrix+1 < planeSize)
-                collisionMatrix[xAtMatrix+1][zAtMatrix+1] = obj;
-        }
-
-    }
-
-}
-*/
-
 
 void gameOver(){
     printf("GAME OVER");
@@ -982,11 +932,11 @@ void gameOver(){
 }
 
 void updateState() {
-if (pengoDead==false)
+if (!pengoDead)
 	if (upPressed || downPressed || rightPressed || leftPressed ) {
 		if (running) {
 			speedX = speed * sin((roty-180)*PI/180) * 2;
-			speedZ = -speed * cos((roty)*PI/180) * 2;
+            speedZ = -speed * cos((roty)*PI/180) * 2;
 		} else {
 			speedX = speed * sin((roty-180)*PI/180);
 			speedZ = -speed * cos((roty)*PI/180);
@@ -1152,55 +1102,6 @@ void moveDatBlock(){
         b->start_moving(speedX, speedZ);
     }
 
-    /*
-    int tileAheadX = mapToMatrixCoordinates(posX);
-    int tileAheadZ = mapToMatrixCoordinates(posZ);
-
-    switch (direction){
-    case 0:
-        tileAheadZ -= 2;
-        break;
-    case 1:
-        tileAheadX += 2;
-        break;
-    case 2:
-        tileAheadZ += 2;
-        break;
-    case 3:
-        tileAheadX -= 2;
-        break;
-    }
-
-    printf ("   xA: %d zA: %d  obj: %d %d\n", tileAheadX, tileAheadZ,
-            collisionMatrix[tileAheadX][tileAheadZ],sceneMatrix[tileAheadX*sceneWidth+tileAheadZ]);
-
-
-    if (sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] == ICECUBE){
-            sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = NOTHING;
-            collisionMatrix[tileAheadX-1][tileAheadZ] = NOTHING;
-            collisionMatrix[tileAheadX+1][tileAheadZ] = NOTHING;
-            collisionMatrix[tileAheadX][tileAheadZ-1] = NOTHING;
-            collisionMatrix[tileAheadX][tileAheadZ+1] = NOTHING;
-
-            switch (direction){
-            case 0:
-                tileAheadZ -= 1;
-                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
-                break;
-            case 1:
-                tileAheadX += 1;
-                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
-                break;
-            case 2:
-                tileAheadZ += 1;
-                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
-                break;
-            case 3:
-                tileAheadX -= 1;
-                sceneMatrix[tileAheadX*sceneWidth+tileAheadZ] = ICECUBE;
-                break;
-            }
-    }*/
 }
 
 bool collides (float pengoX, float pengoZ){
@@ -1265,29 +1166,6 @@ bool collides (float pengoX, float pengoZ){
         break;
 
     }
-    //int x = mapToMatrixCoordinates(pengoX);
-    //int z = mapToMatrixCoordinates(pengoZ);
-    // pengoX in [-12,12]
-    //return x < 0 || z < 0 || x >= planeSize || z >= planeSize || collisionMatrix[x][z] != NOTHING;
-    //gambiarra pra lidar com o erro do tamanho do bloco
-    /*
-    if (collisionMatrix[x][z] != NOTHING){
-        float mX = x-12; //24 é o tamanho da matriz, refatorarei no futuro
-        float mZ = z-12;
-
-        float distFromCenterOfPoligon = ::sqrt(
-                  std::pow(mX - pengoX, 2) +
-                  std::pow(mZ - pengoZ, 2));
-
-        printf ("%f \n", distFromCenterOfPoligon);
-        if (distFromCenterOfPoligon > 1) // touching threshold
-            return false;
-        else
-            return true;
-    }
-    else
-        return false;
-*/
 }
 
 int mapToMatrixCoordinates (float i){
@@ -1332,16 +1210,7 @@ void mainRender() {
         break;
 	}
 	renderScene();
-	glColor3f(1.0,1.0,0.0);
-    glBegin(GL_LINES);
-    for (int i = 0; i < 24; ++i)
-    {
-        glVertex3f(-12.0 + (float)i*1.f, 0.1, -12.0);
-        glVertex3f(-12.0 + (float)i*1.f, 0.1, 12.0);
-        glVertex3f(-12.0, 0.1, -12.0 + (float)i);
-        glVertex3f(12.0, 0.1, -12.0 + (float)i);
-    }
-    glEnd();
+
 	time_t now;
 	time(&now);
 
@@ -1505,6 +1374,45 @@ void onKeyDown(unsigned char key, int x, int y) {
 	//glutPostRedisplay();
 }
 
+void spawnBlock()
+{
+    int x = (int)std::round(pengoPosition.getX()-0.5) + 12;
+    int z = (int)std::round(pengoPosition.getZ()-0.5) + 12;
+    int direction = round(std::abs(int(roty) % 360)/90.0);
+    if (direction == 4)
+        direction = 0;
+    std::cout << direction << std::endl;
+    switch (direction)
+    {
+    case 0:
+        z--;
+        break;
+    case 1:
+        x++;
+        break;
+    case 2:
+        z++;
+        break;
+    case 3:
+        x--;
+        break;
+    }
+
+    if (sceneMatrix[x*24+z] != NOTHING)
+        return;
+    else if(nBlocks > 0)
+    {
+        time_t t;
+        time(&t);
+        blocksToSpawn.push_front(make_pair(t,
+                                           new MovableBlock(
+                                            make_pair(x,z),
+                                            make_pair((float)x-12.0+0.5, (float)z-12.0+0.5))));
+        nBlocks--;
+    }
+
+}
+
 /**
 Key release event handler
 */
@@ -1539,6 +1447,9 @@ void onKeyUp(unsigned char key, int x, int y) {
 			break;
         case 'v':
             current_camera = nextCamera(current_camera);
+            break;
+        case 'e':
+            spawnBlock();
             break;
 		default:
 			break;
@@ -1593,9 +1504,11 @@ int main(int argc, char **argv) {
 	/**
 	Register keyboard events handlers
 	*/
+
+    glutGetModifiers();
 	glutKeyboardFunc(onKeyDown);
 	glutKeyboardUpFunc(onKeyUp);
-
+    speed = 0.05;
 	mainInit();
     time(&startTime);
     #ifdef FULLSCREEN

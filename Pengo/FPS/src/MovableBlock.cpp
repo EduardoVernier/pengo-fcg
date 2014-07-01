@@ -26,6 +26,7 @@ void MovableBlock::move(OBJ_ENUM* sceneMatrix)
 }
 /// //////////////////////////////////////////////
 /// DANGER - UNTESTED ZONE                      //
+
 void give_powerup(ITEMS which)
 {
     extern int nBlocks;

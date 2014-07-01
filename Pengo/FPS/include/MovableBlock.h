@@ -27,7 +27,7 @@ class MovableBlock
 
         bool hasHit();
 
-        friend void give_powerup(ITEMS which);
+        //friend void give_powerup(ITEMS which);
     protected:
         float speedX, speedZ;
         pair<int,int> matrixPosition;
