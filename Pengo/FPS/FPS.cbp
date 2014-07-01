@@ -61,6 +61,7 @@
 		<Unit filename="include/3DObject.h" />
 		<Unit filename="include/Camera.h" />
 		<Unit filename="include/Enemy.h" />
+		<Unit filename="include/MovableBlock.h" />
 		<Unit filename="include/ObjEnum.h" />
 		<Unit filename="include/Point3D.h" />
 		<Unit filename="include/Texture.h" />
@@ -88,7 +89,9 @@
 		<Unit filename="src/bitmap.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/glm.cpp" />
+		<Unit filename="src/glm.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/glmimg.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
