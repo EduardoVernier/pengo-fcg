@@ -20,6 +20,8 @@ class MovableBlock
         pair<int,int> get_matrix_pos();
         pair<float,float> get_screen_pos();
 
+        void insert_item(ITEM which);
+
         bool is_moving();
         bool is_valid();
     protected:
@@ -29,6 +31,7 @@ class MovableBlock
         bool moving = false;
         bool breakWhenStop = true;
         bool isValid = true;
+        ITEMS item = NOTHING;
     private:
 };
 

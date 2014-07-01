@@ -407,7 +407,7 @@ void initEnemies()
                 Enemy x(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 enemies.push_back(x);
             }
-            else if (sceneMatrix[i*24+j] == ICECUBE)
+            else if (sceneMatrix[i*24+j] == ICECUBE || sceneMatrix[i*24+j] == ITEM_BLOCK_CREATION || sceneMatrix[i*24+j] == ITEM_PLAYER_SPEED)
             {
                 MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 blocksMap.insert(make_pair(make_pair(i,j), m));
