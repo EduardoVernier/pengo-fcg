@@ -252,9 +252,10 @@ const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
 //OBJ_ENUM collisionMatrix [planeSize][planeSize];
 vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, NOTHING));
 
-vector<Enemy> enemies;
-vector<MovableBlock*> blocks;
+list<Enemy*> enemies;
+list<MovableBlock*> blocks;
 map<pair<int,int>, MovableBlock*> blocksMap;
+map<pair<int,int>, Enemy*>        enemiesMap;
 list<pair<time_t, MovableBlock*>> blocksToSpawn;
 
 CAMERA_TYPES current_camera = THIRD_PERSON;
@@ -389,8 +390,9 @@ void initEnemies()
             OBJ_ENUM value = sceneMatrix[i*24 + j];
             if (value == ENEMY)
             {
-                Enemy x(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
+                Enemy *x = new Enemy(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 enemies.push_back(x);
+                enemiesMap.insert(make_pair(make_pair(i,j), x));
             }
             else if (value == ICECUBE)
             {
@@ -788,6 +790,16 @@ bool hasBeenDrawn(pair<time_t, MovableBlock*> x)
     time(&now);
     return difftime(now, x.first) >= 2.0;
 };
+
+bool isNotValid(MovableBlock *b)
+{
+    return !b->is_valid();
+};
+
+bool isNotValidEnemy(Enemy* e)
+{
+    return !e->isValid();
+}
 void renderScene() {
 	glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2],backgroundColor[3]);
 	  // limpar o depth buffer
@@ -840,6 +852,10 @@ void renderScene() {
             glPopMatrix();
         }
     }
+    int myRow = (int)std::round(pengoPosition.getX()-0.5) + 12;
+    int myCol = (int)std::round(pengoPosition.getZ()-0.5)+12;
+    if (sceneMatrix[myRow*24+myCol]==ENEMY || sceneMatrix[(myRow+1)*24+myCol]==ENEMY||sceneMatrix[(myRow-1)*24+myCol]==ENEMY || sceneMatrix[myRow*24+myCol+1]==ENEMY||sceneMatrix[myRow*24+myCol-1]==ENEMY)
+        gameOver();
     for (pair<time_t, MovableBlock*> p : blocksToSpawn)
     {
         time_t now;
@@ -855,7 +871,7 @@ void renderScene() {
             glPushMatrix();
             {
 
-                glTranslatef(p.second->get_screen_pos().first, 0.6f, p.second->get_screen_pos().second);
+                glTranslatef(p.second->get_screen_pos().first, 0.5f, p.second->get_screen_pos().second);
                 drawCube(1.0, NOTHING);
 
             }
@@ -866,7 +882,6 @@ void renderScene() {
 
     for (MovableBlock* b : blocks)
     {
-        hitFlag = hitFlag || b->hasHit();
         sceneMatrix[b->get_matrix_pos().first*24+b->get_matrix_pos().second] = NOTHING;
         blocksMap[b->get_matrix_pos()] = NULL;
         blocksMap.erase(b->get_matrix_pos());
@@ -876,24 +891,36 @@ void renderScene() {
         sceneMatrix[b->get_matrix_pos().first*24+b->get_matrix_pos().second] = ICECUBE;
         blocksMap.insert(make_pair(b->get_matrix_pos(), b));
         glPushMatrix();
-        glTranslatef(b->get_screen_pos().first, 0.6f, b->get_screen_pos().second);
+        glTranslatef(b->get_screen_pos().first, 0.5f, b->get_screen_pos().second);
         drawCube(1.0, ICECUBE);
         glPopMatrix();
     }
 
-    for (Enemy& e : enemies)
+    blocks.remove_if(isNotValid);
+
+    for (Enemy* e : enemies)
     {
-        if (e.isValid()){
-            e.move_me(sceneMatrix, 24, 24, hitFlag);
+        if (e->isValid()){
+            if (!e->is_moving())
+            {
+                sceneMatrix[e->get_matrix_pos().first*24 + e->get_matrix_pos().second] = NOTHING;
+                enemiesMap[e->get_matrix_pos()] = NULL;
+            }
+            e->move_me(sceneMatrix, 24, 24);
+            if (!e->is_moving())
+            {
+                sceneMatrix[e->get_matrix_pos().first*24 + e->get_matrix_pos().second] = ENEMY;
+                enemiesMap.insert(make_pair(e->get_matrix_pos(), e));
+            }
             glPushMatrix();
-            glTranslatef(e.get_screen_pos().first, 0.6f, e.get_screen_pos().second);
+            glTranslatef(e->get_screen_pos().first, 0.6f, e->get_screen_pos().second);
             glRotatef(90,1.0,0.0,0.0);
             flower.Draw(SMOOTH_MATERIAL_TEXTURE);
             glPopMatrix();
         }
     }
 
-
+    enemies.remove_if(isNotValidEnemy);
 
     if (!pengoDead){
     glPushMatrix();
@@ -1061,8 +1088,7 @@ if (!pengoDead)
     int myRow = (int) (std::round(pengoPosition.getX()-0.5) + 12);
     int myCol = (int) (std::round(pengoPosition.getZ()-0.5) + 12);
 
-    if (sceneMatrix[myRow*24+myCol]==ENEMY || sceneMatrix[(myRow+1)*24+myCol]==ENEMY||sceneMatrix[(myRow-1)*24+myCol]==ENEMY || sceneMatrix[myRow*24+myCol+1]==ENEMY||sceneMatrix[myRow*24+myCol-1]==ENEMY)
-        gameOver();
+
 
 
 }

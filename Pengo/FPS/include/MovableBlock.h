@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include "ObjEnum.h"
+#include <map>
+#include "Enemy.h"
 using namespace std;
 
 class MovableBlock
@@ -25,7 +27,6 @@ class MovableBlock
         bool is_moving();
         bool is_valid();
 
-        bool hasHit();
 
         //friend void give_powerup(ITEMS which);
     protected:

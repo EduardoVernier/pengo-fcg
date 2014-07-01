@@ -23,9 +23,9 @@ Enemy::Enemy(pair<int, int> matrixPosition, pair<float,float> screenPosition)
     this->screenPosition = screenPosition;
 }
 
-void Enemy::move_me(OBJ_ENUM *matrix, int height, int width, bool hitFlag)
+void Enemy::move_me(OBJ_ENUM *matrix, int height, int width)
 {
-    if (this->moving) { this->keep_moving(matrix, hitFlag); return; };
+    if (this->moving) { this->keep_moving(matrix); return; };
     vector<pair<int,int>> neighbours;
 
 
@@ -60,12 +60,6 @@ void Enemy::move_me(OBJ_ENUM *matrix, int height, int width, bool hitFlag)
             }
             if (matrix[k*24+l] == NOTHING)
                 neighbours.push_back(make_pair(k,l));
-
-            if (matrix[k*24+l] == ICECUBE)
-                if(hitFlag == true){ //COLLISION
-                this->moving = false;
-                this->valid = false;
-            }
         }
     }
     if (neighbours.empty()) return;
@@ -89,15 +83,16 @@ bool Enemy::isValid() {
 
 
 
-void Enemy::keep_moving(OBJ_ENUM *matrix, bool hitFlag)
+void Enemy::keep_moving(OBJ_ENUM *matrix)
 {
+    /*
     const int myRow = matrixPosition.first;
     const int myCol = matrixPosition.second;
-                if ((matrix[myRow*24+myCol] == ICECUBE || matrix[(myRow+1)*24+myCol] == ICECUBE || matrix[(myRow-1)*24+myCol] == ICECUBE || matrix[myRow*24+myCol+1] == ICECUBE || matrix[myRow*24+myCol-1] == ICECUBE) && hitFlag == true){ //COLLISION
+                if ((matrix[myRow*24+myCol] == ICECUBE || matrix[(myRow+1)*24+myCol] == ICECUBE || matrix[(myRow-1)*24+myCol] == ICECUBE || matrix[myRow*24+myCol+1] == ICECUBE || matrix[myRow*24+myCol-1] == ICECUBE)){ //COLLISION
                 this->moving = false;
                 this->valid = false;
             }
-
+    */
     if (std::fabs(this->screenPosition.first - this->targetPosition.first) <= 0.1)
     {
         this->screenPosition.first = this->targetPosition.first;
@@ -130,4 +125,19 @@ pair<int,int> Enemy::get_matrix_pos()
 pair<float,float> Enemy::get_screen_pos()
 {
     return this->screenPosition;
+}
+
+void Enemy::set_valid(bool b)
+{
+    this->valid = b;
+}
+
+bool Enemy::is_moving()
+{
+    return this->moving;
+}
+
+void Enemy::set_moving(bool b)
+{
+    this->moving = b;
 }

@@ -16,10 +16,6 @@ MovableBlock::~MovableBlock()
     //dtor
 }
 
-bool MovableBlock::hasHit(){
-    return hitFlag;
-}
-
 void MovableBlock::move(OBJ_ENUM* sceneMatrix)
 {
     this->move(sceneMatrix, this->speedX, this->speedZ);
@@ -62,15 +58,18 @@ void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
         this->screenPosition = make_pair((float)this->matrixPosition.first - 12.0 + 0.5, (float)this->matrixPosition.second - 12.0 + 0.5);
         return;
     }
-    if (sceneMatrix[nextX*24+nextZ] == ENEMY)
+    if (sceneMatrix[nextX*24+nextZ] == ENEMY && this->is_moving())
     {
+        extern std::map<pair<int,int>, Enemy*> enemiesMap;
         this->moving = false;
         this->isValid = false;
         int x = (int)std::round(this->screenPosition.first - 0.5) + 12;
         int z =(int)std::round(this->screenPosition.second- 0.5) + 12;
         std::cout << "HIT IN" << x << ", " << z << std::endl;
-        this->hitFlag = true;
-
+        Enemy *e = enemiesMap[make_pair(nextX, nextZ)];
+        e->set_valid(false);
+        e->set_moving(false);
+        sceneMatrix[nextX*24+nextZ] = NOTHING;
         return;
     }
     this->screenPosition = make_pair(this->screenPosition.first + speedX * 0.05, this->screenPosition.second + speedZ*0.05);
