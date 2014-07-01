@@ -24,6 +24,8 @@ class MovableBlock
 
         bool is_moving();
         bool is_valid();
+
+        bool hasHit();
     protected:
         float speedX, speedZ;
         pair<int,int> matrixPosition;
@@ -32,6 +34,7 @@ class MovableBlock
         bool breakWhenStop = true;
         bool isValid = true;
         ITEMS item = NO_ITEM;
+        bool hitFlag = false;
     private:
 };
 

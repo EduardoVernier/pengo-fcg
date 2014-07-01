@@ -35,7 +35,6 @@
 				<Option projectIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-std=c++11" />
 					<Add directory="../include" />
 					<Add directory="include" />
 				</Compiler>
@@ -62,7 +61,6 @@
 		<Unit filename="include/3DObject.h" />
 		<Unit filename="include/Camera.h" />
 		<Unit filename="include/Enemy.h" />
-		<Unit filename="include/MovableBlock.h" />
 		<Unit filename="include/ObjEnum.h" />
 		<Unit filename="include/Point3D.h" />
 		<Unit filename="include/Texture.h" />
@@ -74,7 +72,6 @@
 		<Unit filename="include/al/efx.h" />
 		<Unit filename="include/al/xram.h" />
 		<Unit filename="include/bitmap.h" />
-		<Unit filename="include/collision.h" />
 		<Unit filename="include/gl/Texture.h" />
 		<Unit filename="include/gl/gl.h" />
 		<Unit filename="include/gl/glext.h" />
@@ -91,9 +88,7 @@
 		<Unit filename="src/bitmap.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/glm.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="src/glm.cpp" />
 		<Unit filename="src/glmimg.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>

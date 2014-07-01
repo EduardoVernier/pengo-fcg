@@ -135,7 +135,7 @@ bool collides (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
 void moveDatBlock();
-
+void gameOver();
 /**
 Screen dimensions
 */
@@ -245,6 +245,8 @@ vector<Enemy> enemies;
 vector<MovableBlock*> blocks;
 map<pair<int,int>, MovableBlock*> blocksMap;
 CAMERA_TYPES current_camera = THIRD_PERSON;
+bool pengoDead = false;
+bool hitFlag = false;
 void setWindow() {
 
 	glMatrixMode(GL_PROJECTION);
@@ -859,19 +861,9 @@ void renderScene() {
     }
 
 
-
-    for (Enemy& e : enemies)
-    {
-        e.move_me(sceneMatrix, 24, 24);
-        glPushMatrix();
-        glTranslatef(e.get_screen_pos().first, 0.6f, e.get_screen_pos().second);
-        glRotatef(90,1.0,0.0,0.0);
-        flower.Draw(SMOOTH_MATERIAL_TEXTURE);
-        glPopMatrix();
-    }
-
     for (MovableBlock* b : blocks)
     {
+        hitFlag = hitFlag || b->hasHit();
         sceneMatrix[b->get_matrix_pos().first*24+b->get_matrix_pos().second] = NOTHING;
         blocksMap[b->get_matrix_pos()] = NULL;
         blocksMap.erase(b->get_matrix_pos());
@@ -886,14 +878,39 @@ void renderScene() {
         glPopMatrix();
     }
 
-     glPushMatrix();
+    for (Enemy& e : enemies)
+    {
+        if (e.isValid()){
+            e.move_me(sceneMatrix, 24, 24, hitFlag);
+            glPushMatrix();
+            glTranslatef(e.get_screen_pos().first, 0.6f, e.get_screen_pos().second);
+            glRotatef(90,1.0,0.0,0.0);
+            flower.Draw(SMOOTH_MATERIAL_TEXTURE);
+            glPopMatrix();
+        }
+    }
+
+
+
+    if (pengoDead == false){
+    glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
         glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
-
     }
     glPopMatrix();
+    }
+    else {
+    glPushMatrix();
+    {
+        glTranslatef(pengoPosition.getX(), 0.0f + pengoPosition.getY(), pengoPosition.getZ());
+        glRotatef(90, 1.0, 0.0, 0.0);
+        pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
+    }
+    glPopMatrix();
+    }
+
     // sets the bmp file already loaded to the OpenGL parameters
     //setTextureToOpengl(chao);
 	renderFloor();
@@ -952,9 +969,17 @@ void fillCollisionMatrix8 (int xAtMatrix,int zAtMatrix,OBJ_ENUM obj){
 }
 */
 
-void updateState() {
 
-	if (upPressed || downPressed || rightPressed || leftPressed) {
+void gameOver(){
+    printf("GAME OVER");
+    pengoDead = true;
+    std::string printMe ("GAME OVER");
+    writeTextAt(10,10,printMe);//nao funciona essa bagaça
+}
+
+void updateState() {
+if (pengoDead==false)
+	if (upPressed || downPressed || rightPressed || leftPressed ) {
 		if (running) {
 			speedX = 0.05 * sin((roty-180)*PI/180) * 2;
 			speedZ = -0.05 * cos((roty)*PI/180) * 2;
@@ -1078,6 +1103,12 @@ void updateState() {
 			posYOffset = 0.2;
 		}
 	}
+
+    int myRow = (int) (std::round(pengoPosition.getX()-0.5) + 12);
+    int myCol = (int) (std::round(pengoPosition.getZ()-0.5) + 12);
+
+    if (sceneMatrix[myRow*24+myCol]==ENEMY || sceneMatrix[(myRow+1)*24+myCol]==ENEMY||sceneMatrix[(myRow-1)*24+myCol]==ENEMY || sceneMatrix[myRow*24+myCol+1]==ENEMY||sceneMatrix[myRow*24+myCol-1]==ENEMY)
+        gameOver();
 
 
 }

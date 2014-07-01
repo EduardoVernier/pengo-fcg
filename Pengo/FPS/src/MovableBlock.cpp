@@ -16,6 +16,10 @@ MovableBlock::~MovableBlock()
     //dtor
 }
 
+bool MovableBlock::hasHit(){
+    return hitFlag;
+}
+
 void MovableBlock::move(OBJ_ENUM* sceneMatrix)
 {
     this->move(sceneMatrix, this->speedX, this->speedZ);
@@ -46,6 +50,11 @@ void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
     {
         this->moving = false;
         this->isValid = false;
+        int x = (int)std::round(this->screenPosition.first - 0.5) + 12;
+        int z =(int)std::round(this->screenPosition.second- 0.5) + 12;
+        std::cout << "HIT IN" << x << ", " << z << std::endl;
+        this->hitFlag = true;
+
         return;
     }
     this->screenPosition = make_pair(this->screenPosition.first + speedX * 0.05, this->screenPosition.second + speedZ*0.05);
@@ -79,6 +88,7 @@ void MovableBlock::start_moving(int speedX, int speedZ)
     this->breakWhenStop = true;
     this->isValid = true;
     this->moving = true;
+
     this->speedX = speedX;
     this->speedZ = speedZ;
 }
