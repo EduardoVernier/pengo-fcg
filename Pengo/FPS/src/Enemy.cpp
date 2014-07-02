@@ -3,7 +3,7 @@
 
 Enemy::Enemy()
 {
-    //ctor
+
 }
 
 Enemy::~Enemy()
@@ -50,12 +50,11 @@ void Enemy::move_me(OBJ_ENUM *matrix, int height, int width)
 
             if (matrix[k*24+l] == PENGO)
             {
+                extern bool pengoDead;
                 move_to = make_pair(k,l);
-                matrix[this->matrixPosition.first*24 + this->matrixPosition.second] = NOTHING;
-                matrix[move_to.first*24 + move_to.second] = ENEMY;
-                this->targetPosition = make_pair((float)move_to.first - 12.0 + 0.5, (float)move_to.second - 12.0 + 0.5);
+                pengoDead = true;
+                this->targetPosition = make_pair((float) move_to.first - 12.0 + 0.5, (float)move_to.second - 12.0 + 0.5);
                 this->moving = true;
-
                 return;
             }
             if (matrix[k*24+l] == NOTHING)
@@ -63,10 +62,11 @@ void Enemy::move_me(OBJ_ENUM *matrix, int height, int width)
         }
     }
     if (neighbours.empty()) return;
-    default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
-    uniform_int_distribution<int> dist(0, neighbours.size() - 1);
-    int idx = dist(generator);
-    move_to = neighbours[idx];
+    std::shuffle(neighbours.begin(), neighbours.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+    move_to = neighbours[0];
+    this->targetPosition = make_pair((float)move_to.first - 12.0 + 0.5, (float)move_to.second - 12.0 + 0.5);
+    this->moving = true;
+    /*
     matrix[this->matrixPosition.first*24 + this->matrixPosition.second] = NOTHING;
     if (this->valid){
         matrix[move_to.first*24 + move_to.second] = ENEMY;
@@ -74,7 +74,7 @@ void Enemy::move_me(OBJ_ENUM *matrix, int height, int width)
         this->targetPosition = make_pair((float)move_to.first - 12.0 + 0.5, (float)move_to.second - 12.0 + 0.5);
         this->moving = true;
     }
-
+    */
 }
 
 bool Enemy::isValid() {
@@ -112,6 +112,25 @@ void Enemy::keep_moving(OBJ_ENUM *matrix)
     }
 
     if (this->screenPosition == this->targetPosition)
+    {
+        this->moving = false;
+    }
+    this->matrixPosition =
+            make_pair((int)std::round(this->screenPosition.first - 0.5) + 12, (int)std::round(this->screenPosition.first - 0.5) + 12);
+    for (int i = -1; i <= 1; ++i)
+    {
+        for (int j = (i != 0 ? 0 : -1); j <= ( i != 0 ? 0 : 1); j += (i == 0 ? 2 : 1))
+        {
+            if (matrix[(this->matrixPosition.first+i)*24 + this->matrixPosition.second + j] == PENGO)
+            {
+                extern bool pengoDead;
+                pengoDead = true;
+                this->moving = false;
+                return;
+            }
+        }
+    }
+    if (matrix[this->matrixPosition.first*24 + this->matrixPosition.second] != NOTHING)
     {
         this->moving = false;
     }

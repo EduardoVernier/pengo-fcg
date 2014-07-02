@@ -5,6 +5,7 @@
 #include "../include/ObjEnum.h"
 #include <random>
 #include <chrono>
+#include <algorithm>
 
 using namespace std;
 using namespace std::chrono;
@@ -23,6 +24,8 @@ class Enemy
         void set_valid(bool b);
         bool is_moving();
         void set_moving(bool b);
+
+
     protected:
         bool moving = false;
         bool valid = true;
