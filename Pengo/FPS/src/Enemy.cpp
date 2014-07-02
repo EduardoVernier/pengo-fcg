@@ -1,6 +1,8 @@
 #include "../include/Enemy.h"
 #include "../include/collision.h"
 
+extern bool collides(float,float);
+
 Enemy::Enemy()
 {
 
@@ -104,10 +106,12 @@ void Enemy::keep_moving(OBJ_ENUM *matrix)
     if (this->screenPosition.first != this->targetPosition.first)
     {
 
-        if (matrix[((int)std::round(this->targetPosition.first -0.5)+12)*24 + this->matrixPosition.second ] != NOTHING)
+        if (matrix[((int)std::round(this->targetPosition.first -0.5)+12)*24 + ((int)std::round(this->targetPosition.second - 0.5)+12) ] != NOTHING)
         {
             this->moving = false;
-            this->targetPosition = this->screenPosition;
+
+            this->targetPosition = make_pair(float(this->matrixPosition.first) -12 + 0.5, float(this->matrixPosition.second) -12.0 + 0.5);
+            return;
         }
 
         this->screenPosition.first += (this->screenPosition.first < this->targetPosition.first ? 0.05 : -0.05);
@@ -118,7 +122,8 @@ void Enemy::keep_moving(OBJ_ENUM *matrix)
         if (matrix[this->matrixPosition.first*24 + ((int)std::round(this->targetPosition.second - 0.5) + 12)] != NOTHING)
         {
             this->moving = false;
-            this->targetPosition = this->screenPosition;
+            this->targetPosition = make_pair(float(this->matrixPosition.first) -12 + 0.5, float(this->matrixPosition.second) -12.0 + 0.5);
+            return;
         }
         this->screenPosition.second += (this->screenPosition.second < this->targetPosition.second ? 0.05 : -0.05);
     }

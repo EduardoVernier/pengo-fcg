@@ -1,3 +1,8 @@
+/// TRABALHO FINAL FUNDAMENTOS DE COMPUTAÇÃO GRÁFICA
+/// GRUPO: ÁLISTER MACHADO E EDUARDO VERNIER
+///        00220494          00218313
+
+
 #include <windows.h>
 #include "../include/collision.h"
 #include <stdio.h>
@@ -116,7 +121,6 @@ typedef struct textura {
         GLenum      type;            /* Texture type */
 } Texture;
 void mainInit();
-void initSound();
 void initTexture();
 void initModel();
 void initLight();
@@ -139,7 +143,6 @@ void renderFloor();
 void updateCam();
 void setTextureToOpengl(Texture&);
 time_t startTime;
-void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
 bool collides (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
@@ -252,7 +255,6 @@ Camera pengoCamera, ceilingCamera, fpCamera;
 Point3D pengoPosition;
 const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
 //OBJ_ENUM collisionMatrix [planeSize][planeSize];
-vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, NOTHING));
 
 list<Enemy*> enemies;
 list<MovableBlock*> blocks;
@@ -411,6 +413,7 @@ void initEnemies()
                 Enemy *x = new Enemy(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 enemies.push_back(x);
                 enemiesMap.insert(make_pair(make_pair(i,j), x));
+
             }
             else if (value == ICECUBE)
             {
@@ -474,7 +477,6 @@ void mainInit() {
 	// habilita o z-buffer
 	glEnable(GL_DEPTH_TEST);
 
-    initSound();
 
     initTexture();
 
@@ -506,69 +508,6 @@ void initModel() {
 	//modelAL = CModelAl();
 	//modelAL.Init();
 	printf("Models ok. \n \n \n");
-}
-
-/**
-Initialize openal and check for errors
-*/
-void initSound() {
-
-	printf("Initializing OpenAl \n");
-
-	// Init openAL
-	alutInit(0, NULL);
-
-	alGetError(); // clear any error messages
-
-    // Generate buffers, or else no sound will happen!
-    alGenBuffers(NUM_BUFFERS, buffer);
-
-    if(alGetError() != AL_NO_ERROR)
-    {
-        printf("- Error creating buffers !!\n");
-        exit(1);
-    }
-    else
-    {
-        printf("init() - No errors yet.\n");
-    }
-
-	alutLoadWAVFile("Footsteps.wav",&format,&data,&size,&freq,false);
-    alBufferData(buffer[0],format,data,size,freq);
-
-	alGetError(); /* clear error */
-    alGenSources(NUM_SOURCES, source);
-
-    if(alGetError() != AL_NO_ERROR)
-    {
-        printf("- Error creating sources !!\n");
-        exit(2);
-    }
-    else
-    {
-        printf("init - no errors after alGenSources\n");
-    }
-
-	listenerPos[0] = posX;
-	listenerPos[1] = posY;
-	listenerPos[2] = posZ;
-
-	source0Pos[0] = posX;
-	source0Pos[1] = posY;
-	source0Pos[2] = posZ;
-
-	alListenerfv(AL_POSITION,listenerPos);
-    alListenerfv(AL_VELOCITY,listenerVel);
-    alListenerfv(AL_ORIENTATION,listenerOri);
-
-	alSourcef(source[0], AL_PITCH, 1.0f);
-    alSourcef(source[0], AL_GAIN, 1.0f);
-    alSourcefv(source[0], AL_POSITION, source0Pos);
-    alSourcefv(source[0], AL_VELOCITY, source0Vel);
-    alSourcei(source[0], AL_BUFFER,buffer[0]);
-    alSourcei(source[0], AL_LOOPING, AL_TRUE);
-
-	printf("Sound ok! \n\n");
 }
 
 /**
@@ -1178,7 +1117,7 @@ void moveDatBlock(){
     }
     if (sceneMatrix[(x+speedX)*24 + (z+speedZ)  ] == ICECUBE)
     {
-        MovableBlock *b = blocksMap[make_pair(x+2*speedX,z+2*speedZ)];
+        MovableBlock *b = blocksMap[make_pair(x+speedX,z+speedZ)];
         b->start_moving(speedX, speedZ);
     }
     else if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
@@ -1282,7 +1221,7 @@ void getTimeString(int minutes, int seconds, char *out)
 {
     sprintf(out, "%02d:%02d", minutes, seconds);
 }
-
+bool userWon = false;
 /**
 Render scene
 */
@@ -1336,7 +1275,13 @@ void mainRender() {
     }
     writeTextAt(0,0,printMe);
     glColor3d(1.0,0.0,0.0);
-    if (pengoDead) gameOver();
+    if (userWon)
+    {
+        glColor3d(0.0,1.0,0.0);
+        std::string youwon = "YOU WON!!!!";
+        writeTextAt(10, 10, youwon);
+    }
+    else if (pengoDead) gameOver();
     glColor3d(1.0,1.0,1.0);
     char buffer2[256];
     sprintf(buffer2, "N blocos simultaneos: %d", nBlocks);
@@ -1366,6 +1311,11 @@ void mainRender() {
 
     renderScene();
     updateLights();
+
+    if (enemies.empty())
+    {
+        userWon = true;
+    }
 
 	glFlush();
     glEnable(GL_FOG);

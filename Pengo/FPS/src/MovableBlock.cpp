@@ -20,8 +20,6 @@ void MovableBlock::move(OBJ_ENUM* sceneMatrix)
 {
     this->move(sceneMatrix, this->speedX, this->speedZ);
 }
-/// //////////////////////////////////////////////
-/// DANGER - UNTESTED ZONE                      //
 
 void give_powerup(ITEMS which)
 {
@@ -36,7 +34,6 @@ void give_powerup(ITEMS which)
         speed += 0.05f;
     }
 }
-/// //////////////////////////////////////////////
 void MovableBlock::move(OBJ_ENUM *sceneMatrix, int speedX , int speedZ)
 {
     this->moving = true;
