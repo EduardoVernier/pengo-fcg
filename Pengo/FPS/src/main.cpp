@@ -9,8 +9,8 @@
 #include <iostream>
 #include <gl/glut.h>
 #include <string>
-
-
+#include <chrono>
+#include <algorithm>
 /// STL INCLUSIONS
 #include <vector>
 #include <map>
@@ -19,7 +19,7 @@ using std::vector;
 using std::map;
 using std::list;
 
-
+using namespace std::chrono;
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -350,6 +350,8 @@ void initLight() {
     glEnable(GL_LIGHTING );
 	glEnable( GL_LIGHT0 );
     glEnable( GL_LIGHT1 );
+    glEnable( GL_LIGHT2 );
+    glEnable( GL_LIGHT3 );
     // PARAMETERS FOR LIGHT0
     GLfloat light_ambient[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
 	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -376,6 +378,21 @@ void initLight() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+
+    GLfloat light_ambient2[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
+    GLfloat light_diffuse2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_position2[] = { -12.0f, 5.0f, -12.0f, 0.0f };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient2);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse2);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular2);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position2);
+
+    GLfloat light_ambient3[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
+    GLfloat light_diffuse3[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular3[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_position3[] = { 12.0f, 5.0f, 12.0f, 0.0f };
 }
 
 void setViewport(GLint left, GLint right, GLint bottom, GLint top) {
@@ -401,6 +418,7 @@ void initEnemies()
                 blocksMap.insert(make_pair(make_pair(i,j), m));
                 blocks.push_back(m);
             }
+            /*
             else if (value == ITEM_BLOCK_CREATION)
             {
                 MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
@@ -417,7 +435,21 @@ void initEnemies()
                 blocks.push_back(m);
                 sceneMatrix[i*24+j] = ICECUBE;
             }
+            */
         }
+    }
+    vector<MovableBlock*> v(blocks.begin(), blocks.end());
+    std::shuffle(v.begin(), v.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+    int i = 0;
+    for (auto it = v.begin(); it != v.end(); ++it)
+    {
+        if (i/4)
+        {
+            (*it)->insert_item(SPEED);
+        }
+        else (*it)->insert_item(NBLOCKS);
+        ++i;
+        if (i == 8) break;
     }
 }
 
@@ -949,7 +981,6 @@ void renderScene() {
     glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
-
         glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }
@@ -982,6 +1013,7 @@ void gameOver(){
 }
 
 void updateState() {
+    sceneMatrix[((int)std::round(pengoPosition.getX() -0.5)+12)*24 + (int)std::round(pengoPosition.getZ()-0.5)+12] = NOTHING;
 if (!pengoDead)
 	if (upPressed || downPressed || rightPressed || leftPressed ) {
 		if (running) {
@@ -1144,8 +1176,12 @@ void moveDatBlock(){
         speedZ = 0;
         break;
     }
-
-    if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
+    if (sceneMatrix[(x+speedX)*24 + (z+speedZ)  ] == ICECUBE)
+    {
+        MovableBlock *b = blocksMap[make_pair(x+2*speedX,z+2*speedZ)];
+        b->start_moving(speedX, speedZ);
+    }
+    else if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
     {
         MovableBlock *b = blocksMap[make_pair(x+2*speedX,z+2*speedZ)];
         b->start_moving(speedX, speedZ);
@@ -1171,7 +1207,7 @@ bool collides (float pengoX, float pengoZ){
     if (z <= 0 || z >= planeSize - 1 || x <= 0 || x >= planeSize - 1) return true;
 
     bool helper = false;
-    for (int i = -1; i <= 1; ++i)
+    /*for (int i = -1; i <= 1; ++i)
     {
         for (int j = -1; j <= 1; ++j)
         {
@@ -1185,7 +1221,7 @@ bool collides (float pengoX, float pengoZ){
             }
         }
     }
-
+    */
     switch (direction)
     {
     case 0:
@@ -1301,7 +1337,14 @@ void mainRender() {
     writeTextAt(0,0,printMe);
     glColor3d(1.0,0.0,0.0);
     if (pengoDead) gameOver();
-
+    glColor3d(1.0,1.0,1.0);
+    char buffer2[256];
+    sprintf(buffer2, "N blocos simultaneos: %d", nBlocks);
+    printMe = buffer2;
+    writeTextAt(0,windowHeight-20, printMe);
+    sprintf(buffer2, "Velocidade: %d", (int)(speed/0.05));
+    printMe = buffer2;
+    writeTextAt(windowWidth/3, windowHeight-20, printMe);
     glEnable(GL_LIGHTING);
 
     glDisable(GL_FOG);

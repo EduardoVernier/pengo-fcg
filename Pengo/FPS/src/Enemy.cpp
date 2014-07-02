@@ -103,11 +103,23 @@ void Enemy::keep_moving(OBJ_ENUM *matrix)
     }
     if (this->screenPosition.first != this->targetPosition.first)
     {
+
+        if (matrix[((int)std::round(this->targetPosition.first -0.5)+12)*24 + this->matrixPosition.second ] != NOTHING)
+        {
+            this->moving = false;
+            this->targetPosition = this->screenPosition;
+        }
+
         this->screenPosition.first += (this->screenPosition.first < this->targetPosition.first ? 0.05 : -0.05);
         return;
     }
     if (this->screenPosition.second != this->targetPosition.second)
     {
+        if (matrix[this->matrixPosition.first*24 + ((int)std::round(this->targetPosition.second - 0.5) + 12)] != NOTHING)
+        {
+            this->moving = false;
+            this->targetPosition = this->screenPosition;
+        }
         this->screenPosition.second += (this->screenPosition.second < this->targetPosition.second ? 0.05 : -0.05);
     }
 
@@ -117,13 +129,13 @@ void Enemy::keep_moving(OBJ_ENUM *matrix)
     }
     this->matrixPosition =
             make_pair((int)std::round(this->screenPosition.first - 0.5) + 12, (int)std::round(this->screenPosition.first - 0.5) + 12);
+    extern bool pengoDead;
     for (int i = -1; i <= 1; ++i)
     {
         for (int j = (i != 0 ? 0 : -1); j <= ( i != 0 ? 0 : 1); j += (i == 0 ? 2 : 1))
         {
             if (matrix[(this->matrixPosition.first+i)*24 + this->matrixPosition.second + j] == PENGO)
             {
-                extern bool pengoDead;
                 pengoDead = true;
                 this->moving = false;
                 return;
