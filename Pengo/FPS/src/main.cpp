@@ -292,8 +292,8 @@ void updateCam() {
     pengoCamera.set_upvector(0.0, 1.0, 0.0);
 	// pengoCamera.callGluLookAt();
 
-    fpCamera.set_eye(pengoPosition);
-    fpCamera.set_center(pengoPosition - 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
+    fpCamera.set_eye(pengoPosition+ Point3D(0.0, 1.0, 0.0));
+    fpCamera.set_center((pengoPosition + Point3D(0.0,1.0,0.0)) - 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
 
 
 	// atualiza a posição do listener e da origen do som, são as mesmas da camera, já que os passos vem de onde o personagem está
@@ -339,7 +339,7 @@ void writeTextAt(int x, int y, std::string text)
     glLoadIdentity(); // reset it again. (may not be required, but it my convention)
     glRasterPos2i(x, y); // raster position in 2D
     for(int i=0; i<text.size(); i++){
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
     }
     glPopMatrix(); // get MODELVIEW matrix value from stack
     glMatrixMode(GL_PROJECTION); // change current matrix mode to PROJECTION
@@ -1265,15 +1265,12 @@ void mainRender() {
     {
         glColor3d(1.0,0.0,0.0);
     }
-    else if (diff <= 0)
-    {
-        pengoDead = true;
-    }
     else
     {
         glColor3d(1.0,1.0,1.0);
     }
-    writeTextAt(0,0,printMe);
+    if (!pengoDead)
+        writeTextAt(0,0,printMe);
     glColor3d(1.0,0.0,0.0);
     if (userWon)
     {
@@ -1315,6 +1312,11 @@ void mainRender() {
     if (enemies.empty())
     {
         userWon = true;
+    }
+    if (diff <= 0)
+    {
+        pengoDead = true;
+        gameOver();
     }
 
 	glFlush();
