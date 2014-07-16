@@ -1045,7 +1045,7 @@
 1403812254 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\texture.cpp
 	"../include/Texture.h"
 
-1404261855 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
+1404267916 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\main.cpp
 	<windows.h>
 	"../include/collision.h"
 	<stdio.h>
@@ -1056,6 +1056,8 @@
 	<iostream>
 	<gl/glut.h>
 	<string>
+	<chrono>
+	<algorithm>
 	<vector>
 	<map>
 	<list>
@@ -1122,7 +1124,7 @@
 	"../include/Point3D.h"
 	<cmath>
 
-1404260575 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\enemy.cpp
+1404269018 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\enemy.cpp
 	"../include/Enemy.h"
 	"../include/collision.h"
 
@@ -1169,7 +1171,7 @@
 	<map>
 	"Enemy.h"
 
-1404256318 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\movableblock.cpp
+1404267910 source:c:\users\userseven\documents\github\pengo-fcg\pengo\fps\src\movableblock.cpp
 	"../include/MovableBlock.h"
 
 1404187345 c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\collision.h
@@ -1321,4 +1323,143 @@
 1404245130 source:c:\users\samsung\desktop\pengo-fcg\pengo\fps\include\glm.h
 	<GLUT/glut.h>
 	<GL/gl.h>
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\3dobject.cpp
+	"../include/3DObject.h"
+	<malloc.h>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\3dobject.h
+	<string.h>
+	"glm.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\glm.h
+	<GLUT/glut.h>
+	<GL/gl.h>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\gl\gl.h
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\bitmap.c
+	"../include/bitmap.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\bitmap.h
+	<GL/glut.h>
+	<windows.h>
+	<wingdi.h>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\gl\glut.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\gl\glu.h
+	<stddef.h>
+	<GL/gl.h>
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\camera.cpp
+	"../include/Camera.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\camera.h
+	<gl/glu.h>
+	<gl/glut.h>
+	"../include/Point3D.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\point3d.h
+	<gl/gl.h>
+	<cstdio>
+
+1404309255 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\enemy.cpp
+	"../include/Enemy.h"
+	"../include/collision.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\enemy.h
+	<iostream>
+	<vector>
+	"../include/ObjEnum.h"
+	<random>
+	<chrono>
+	<algorithm>
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\objenum.h
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\collision.h
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\glm.cpp
+	<cmath>
+	<cstdio>
+	<cstdlib>
+	<string.h>
+	<cassert>
+	"../include/glm.h"
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\glmimg.cpp
+	<string.h>
+	<math.h>
+	"../include/Texture.h"
+	<windows.h>
+	<GL/gl.h>
+	"../include/glm.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\texture.h
+	<windows.h>
+	<windowsx.h>
+	<stdlib.h>
+	<stdio.h>
+	<GL/glut.h>
+	<math.h>
+
+1404311411 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\main.cpp
+	<windows.h>
+	"../include/collision.h"
+	<stdio.h>
+	<stdlib.h>
+	<cmath>
+	<ctime>
+	<cstring>
+	<iostream>
+	<gl/glut.h>
+	<string>
+	<chrono>
+	<algorithm>
+	<vector>
+	<map>
+	<list>
+	"../include/al/alut.h"
+	"../include/bitmap.h"
+	"../include/3DObject.h"
+	"../include/Enemy.h"
+	"../include/Camera.h"
+	"../include/MovableBlock.h"
+	"../include/ObjEnum.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\al\alut.h
+	<al/alc.h>
+	<al/al.h>
+	<OpenAL/alc.h>
+	<OpenAL/al.h>
+	"al.h"
+	"alc.h"
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\al\alc.h
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\al\al.h
+
+1404266368 c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\include\movableblock.h
+	<iostream>
+	<cmath>
+	"ObjEnum.h"
+	<map>
+	"Enemy.h"
+
+1404309255 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\movableblock.cpp
+	"../include/MovableBlock.h"
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\point3d.cpp
+	"../include/Point3D.h"
+	<cmath>
+
+1404266369 source:c:\users\samsung\desktop\a\pengo-fcg\pengo\fps\src\texture.cpp
+	"../include/Texture.h"
 

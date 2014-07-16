@@ -35,6 +35,7 @@
 				<Option projectIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-std=c++11" />
 					<Add directory="../include" />
 					<Add directory="include" />
 				</Compiler>

@@ -1,3 +1,8 @@
+/// TRABALHO FINAL FUNDAMENTOS DE COMPUTAÇÃO GRÁFICA
+/// GRUPO: ÁLISTER MACHADO E EDUARDO VERNIER
+///        00220494          00218313
+
+
 #include <windows.h>
 #include "../include/collision.h"
 #include <stdio.h>
@@ -9,8 +14,8 @@
 #include <iostream>
 #include <gl/glut.h>
 #include <string>
-
-
+#include <chrono>
+#include <algorithm>
 /// STL INCLUSIONS
 #include <vector>
 #include <map>
@@ -19,7 +24,7 @@ using std::vector;
 using std::map;
 using std::list;
 
-
+using namespace std::chrono;
 //openal (sound lib)
 #include "../include/al/alut.h"
 
@@ -116,7 +121,6 @@ typedef struct textura {
         GLenum      type;            /* Texture type */
 } Texture;
 void mainInit();
-void initSound();
 void initTexture();
 void initModel();
 void initLight();
@@ -139,7 +143,6 @@ void renderFloor();
 void updateCam();
 void setTextureToOpengl(Texture&);
 time_t startTime;
-void fillCollisionMatrix8 (int xAtMatrix, int zAtMatrix,OBJ_ENUM obj);
 bool collides (float pengoX, float pengoZ);
 int mapToMatrixCoordinates (float i);
 CAMERA_TYPES nextCamera(CAMERA_TYPES curCamera);
@@ -252,7 +255,6 @@ Camera pengoCamera, ceilingCamera, fpCamera;
 Point3D pengoPosition;
 const int planeSize = 24; // mexer nessa constante dá 7 anos de azar
 //OBJ_ENUM collisionMatrix [planeSize][planeSize];
-vector<vector<OBJ_ENUM>> collisionMatrix(planeSize, vector<OBJ_ENUM>(planeSize, NOTHING));
 
 list<Enemy*> enemies;
 list<MovableBlock*> blocks;
@@ -290,8 +292,8 @@ void updateCam() {
     pengoCamera.set_upvector(0.0, 1.0, 0.0);
 	// pengoCamera.callGluLookAt();
 
-    fpCamera.set_eye(pengoPosition);
-    fpCamera.set_center(pengoPosition - 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
+    fpCamera.set_eye(pengoPosition+ Point3D(0.0, 1.0, 0.0));
+    fpCamera.set_center((pengoPosition + Point3D(0.0,1.0,0.0)) - 5 * Point3D(sin(roty*PI/180), -cos(rotx*PI/180), cos(roty*PI/180)));
 
 
 	// atualiza a posição do listener e da origen do som, são as mesmas da camera, já que os passos vem de onde o personagem está
@@ -337,7 +339,7 @@ void writeTextAt(int x, int y, std::string text)
     glLoadIdentity(); // reset it again. (may not be required, but it my convention)
     glRasterPos2i(x, y); // raster position in 2D
     for(int i=0; i<text.size(); i++){
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, (int)text.at(i)); // generation of characters in our text with 9 by 15 GLU font
     }
     glPopMatrix(); // get MODELVIEW matrix value from stack
     glMatrixMode(GL_PROJECTION); // change current matrix mode to PROJECTION
@@ -350,6 +352,8 @@ void initLight() {
     glEnable(GL_LIGHTING );
 	glEnable( GL_LIGHT0 );
     glEnable( GL_LIGHT1 );
+    glEnable( GL_LIGHT2 );
+    glEnable( GL_LIGHT3 );
     // PARAMETERS FOR LIGHT0
     GLfloat light_ambient[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
 	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -376,6 +380,21 @@ void initLight() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+
+    GLfloat light_ambient2[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
+    GLfloat light_diffuse2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular2[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_position2[] = { -12.0f, 5.0f, -12.0f, 0.0f };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient2);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse2);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular2);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position2);
+
+    GLfloat light_ambient3[] = { backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
+    GLfloat light_diffuse3[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular3[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_position3[] = { 12.0f, 5.0f, 12.0f, 0.0f };
 }
 
 void setViewport(GLint left, GLint right, GLint bottom, GLint top) {
@@ -394,6 +413,7 @@ void initEnemies()
                 Enemy *x = new Enemy(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
                 enemies.push_back(x);
                 enemiesMap.insert(make_pair(make_pair(i,j), x));
+
             }
             else if (value == ICECUBE)
             {
@@ -401,6 +421,7 @@ void initEnemies()
                 blocksMap.insert(make_pair(make_pair(i,j), m));
                 blocks.push_back(m);
             }
+            /*
             else if (value == ITEM_BLOCK_CREATION)
             {
                 MovableBlock *m = new MovableBlock(make_pair(i,j), make_pair((float)i-12.0+0.5, (float)j-12.0+0.5));
@@ -417,7 +438,21 @@ void initEnemies()
                 blocks.push_back(m);
                 sceneMatrix[i*24+j] = ICECUBE;
             }
+            */
         }
+    }
+    vector<MovableBlock*> v(blocks.begin(), blocks.end());
+    std::shuffle(v.begin(), v.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+    int i = 0;
+    for (auto it = v.begin(); it != v.end(); ++it)
+    {
+        if (i/4)
+        {
+            (*it)->insert_item(SPEED);
+        }
+        else (*it)->insert_item(NBLOCKS);
+        ++i;
+        if (i == 8) break;
     }
 }
 
@@ -442,7 +477,6 @@ void mainInit() {
 	// habilita o z-buffer
 	glEnable(GL_DEPTH_TEST);
 
-    initSound();
 
     initTexture();
 
@@ -474,69 +508,6 @@ void initModel() {
 	//modelAL = CModelAl();
 	//modelAL.Init();
 	printf("Models ok. \n \n \n");
-}
-
-/**
-Initialize openal and check for errors
-*/
-void initSound() {
-
-	printf("Initializing OpenAl \n");
-
-	// Init openAL
-	alutInit(0, NULL);
-
-	alGetError(); // clear any error messages
-
-    // Generate buffers, or else no sound will happen!
-    alGenBuffers(NUM_BUFFERS, buffer);
-
-    if(alGetError() != AL_NO_ERROR)
-    {
-        printf("- Error creating buffers !!\n");
-        exit(1);
-    }
-    else
-    {
-        printf("init() - No errors yet.\n");
-    }
-
-	alutLoadWAVFile("Footsteps.wav",&format,&data,&size,&freq,false);
-    alBufferData(buffer[0],format,data,size,freq);
-
-	alGetError(); /* clear error */
-    alGenSources(NUM_SOURCES, source);
-
-    if(alGetError() != AL_NO_ERROR)
-    {
-        printf("- Error creating sources !!\n");
-        exit(2);
-    }
-    else
-    {
-        printf("init - no errors after alGenSources\n");
-    }
-
-	listenerPos[0] = posX;
-	listenerPos[1] = posY;
-	listenerPos[2] = posZ;
-
-	source0Pos[0] = posX;
-	source0Pos[1] = posY;
-	source0Pos[2] = posZ;
-
-	alListenerfv(AL_POSITION,listenerPos);
-    alListenerfv(AL_VELOCITY,listenerVel);
-    alListenerfv(AL_ORIENTATION,listenerOri);
-
-	alSourcef(source[0], AL_PITCH, 1.0f);
-    alSourcef(source[0], AL_GAIN, 1.0f);
-    alSourcefv(source[0], AL_POSITION, source0Pos);
-    alSourcefv(source[0], AL_VELOCITY, source0Vel);
-    alSourcei(source[0], AL_BUFFER,buffer[0]);
-    alSourcei(source[0], AL_LOOPING, AL_TRUE);
-
-	printf("Sound ok! \n\n");
 }
 
 /**
@@ -949,7 +920,6 @@ void renderScene() {
     glPushMatrix();
     {
         glTranslatef(pengoPosition.getX(), 0.6f + pengoPosition.getY(), pengoPosition.getZ());
-
         glRotatef(roty - 180, 0.0, 0.1, 0.0);
         pengo.Draw(SMOOTH_MATERIAL_TEXTURE);
     }
@@ -982,6 +952,7 @@ void gameOver(){
 }
 
 void updateState() {
+    sceneMatrix[((int)std::round(pengoPosition.getX() -0.5)+12)*24 + (int)std::round(pengoPosition.getZ()-0.5)+12] = NOTHING;
 if (!pengoDead)
 	if (upPressed || downPressed || rightPressed || leftPressed ) {
 		if (running) {
@@ -1144,8 +1115,12 @@ void moveDatBlock(){
         speedZ = 0;
         break;
     }
-
-    if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
+    if (sceneMatrix[(x+speedX)*24 + (z+speedZ)  ] == ICECUBE)
+    {
+        MovableBlock *b = blocksMap[make_pair(x+speedX,z+speedZ)];
+        b->start_moving(speedX, speedZ);
+    }
+    else if (sceneMatrix[(x+2*speedX)*24+(z+2*speedZ)] == ICECUBE)
     {
         MovableBlock *b = blocksMap[make_pair(x+2*speedX,z+2*speedZ)];
         b->start_moving(speedX, speedZ);
@@ -1171,7 +1146,7 @@ bool collides (float pengoX, float pengoZ){
     if (z <= 0 || z >= planeSize - 1 || x <= 0 || x >= planeSize - 1) return true;
 
     bool helper = false;
-    for (int i = -1; i <= 1; ++i)
+    /*for (int i = -1; i <= 1; ++i)
     {
         for (int j = -1; j <= 1; ++j)
         {
@@ -1185,7 +1160,7 @@ bool collides (float pengoX, float pengoZ){
             }
         }
     }
-
+    */
     switch (direction)
     {
     case 0:
@@ -1246,7 +1221,7 @@ void getTimeString(int minutes, int seconds, char *out)
 {
     sprintf(out, "%02d:%02d", minutes, seconds);
 }
-
+bool userWon = false;
 /**
 Render scene
 */
@@ -1290,18 +1265,28 @@ void mainRender() {
     {
         glColor3d(1.0,0.0,0.0);
     }
-    else if (diff <= 0)
-    {
-        pengoDead = true;
-    }
     else
     {
         glColor3d(1.0,1.0,1.0);
     }
-    writeTextAt(0,0,printMe);
+    if (!pengoDead)
+        writeTextAt(0,0,printMe);
     glColor3d(1.0,0.0,0.0);
-    if (pengoDead) gameOver();
-
+    if (userWon)
+    {
+        glColor3d(0.0,1.0,0.0);
+        std::string youwon = "YOU WON!!!!";
+        writeTextAt(10, 10, youwon);
+    }
+    else if (pengoDead) gameOver();
+    glColor3d(1.0,1.0,1.0);
+    char buffer2[256];
+    sprintf(buffer2, "N blocos simultaneos: %d", nBlocks);
+    printMe = buffer2;
+    writeTextAt(0,windowHeight-20, printMe);
+    sprintf(buffer2, "Velocidade: %d", (int)(speed/0.05));
+    printMe = buffer2;
+    writeTextAt(windowWidth/3, windowHeight-20, printMe);
     glEnable(GL_LIGHTING);
 
     glDisable(GL_FOG);
@@ -1323,6 +1308,16 @@ void mainRender() {
 
     renderScene();
     updateLights();
+
+    if (enemies.empty())
+    {
+        userWon = true;
+    }
+    if (diff <= 0)
+    {
+        pengoDead = true;
+        gameOver();
+    }
 
 	glFlush();
     glEnable(GL_FOG);
